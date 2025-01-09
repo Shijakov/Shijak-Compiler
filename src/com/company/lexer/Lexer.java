@@ -22,6 +22,7 @@ public class Lexer {
     public MyMatcher closingSquareBracketMatcher = new MyMatcher("]");
     public MyMatcher expressionCombinerMatcher = new MyMatcher(">>");
     public MyMatcher functionMatcher = new MyMatcher("fun");
+    public MyMatcher bagMatcher = new MyMatcher("bag");
     public MyMatcher defineMatcher = new MyMatcher("define");
     public MyMatcher ifMatcher = new MyMatcher("if");
     public MyMatcher elifMatcher = new MyMatcher("elif");
@@ -33,11 +34,13 @@ public class Lexer {
     public MyMatcher inputMatcher = new MyMatcher("input");
     public MyMatcher letMatcher = new MyMatcher("let");
     public MyMatcher allocMatcher = new MyMatcher("alloc");
+    public MyMatcher fillMatcher = new MyMatcher("fill");
     public MyMatcher freeMatcher = new MyMatcher("free");
     public MyMatcher eqMatcher = new MyMatcher("eq");
     public MyMatcher inMatcher = new MyMatcher("in");
     public MyMatcher semiColonMatcher = new MyMatcher(";");
     public MyMatcher commaMatcher = new MyMatcher(",");
+    public MyMatcher dotMatcher = new MyMatcher("\\.");
     public MyMatcher colonMatcher = new MyMatcher(":");
     public MyMatcher plusMatcher = new MyMatcher("\\+");
     public MyMatcher minusMatcher = new MyMatcher("-");
@@ -122,6 +125,9 @@ public class Lexer {
         matchers.add(intConstMatcher);
         matchers.add(charConstMatcher);
         matchers.add(nameMatcher);
+        matchers.add(bagMatcher);
+        matchers.add(fillMatcher);
+        matchers.add(dotMatcher);
 
         matcherTokenMap = new HashMap<>();
         matcherTokenMap.put(returnMatcher, Token.TokenType.RETURN_KEYWORD);
@@ -175,6 +181,9 @@ public class Lexer {
         matcherTokenMap.put(openingCurlyBracketMatcher, Token.TokenType.OPEN_CURLY_BRACKET);
         matcherTokenMap.put(closingBracketMatcher, Token.TokenType.CLOSE_BRACKET);
         matcherTokenMap.put(openingBracketMatcher, Token.TokenType.OPEN_BRACKET);
+        matcherTokenMap.put(bagMatcher, Token.TokenType.BAG_KEYWORD);
+        matcherTokenMap.put(fillMatcher, Token.TokenType.FILL_KEYWORD);
+        matcherTokenMap.put(dotMatcher, Token.TokenType.DOT);
     }
 
     public List<Token> getTokens(String program) throws UnknownSymbolException {

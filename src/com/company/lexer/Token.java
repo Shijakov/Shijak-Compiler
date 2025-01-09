@@ -24,6 +24,8 @@ public class Token {
         EQ_KEYWORD,
         IN_KEYWORD,
         DEFINE_KEYWORD,
+        BAG_KEYWORD,
+        FILL_KEYWORD,
         // Operators
         GREATER_OPERATOR,
         LESS_OPERATOR,
@@ -50,6 +52,7 @@ public class Token {
         COMMA,
         SEMI_COLON,
         COLON,
+        DOT,
         // Identifier
         IDENTIFIER,
         // Constant
