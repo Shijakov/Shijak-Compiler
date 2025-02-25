@@ -71,6 +71,9 @@ public class Lexer {
 
     public Lexer() {
         matchers = new ArrayList<>();
+        matchers.add(bagMatcher);
+        matchers.add(fillMatcher);
+        matchers.add(dotMatcher);
         matchers.add(multiLineCommentMatcher);
         matchers.add(commentMatcher);
         matchers.add(blankMatcher);
@@ -125,11 +128,11 @@ public class Lexer {
         matchers.add(intConstMatcher);
         matchers.add(charConstMatcher);
         matchers.add(nameMatcher);
-        matchers.add(bagMatcher);
-        matchers.add(fillMatcher);
-        matchers.add(dotMatcher);
 
         matcherTokenMap = new HashMap<>();
+        matcherTokenMap.put(bagMatcher, Token.TokenType.BAG_KEYWORD);
+        matcherTokenMap.put(fillMatcher, Token.TokenType.FILL_KEYWORD);
+        matcherTokenMap.put(dotMatcher, Token.TokenType.DOT);
         matcherTokenMap.put(returnMatcher, Token.TokenType.RETURN_KEYWORD);
         matcherTokenMap.put(voidMatcher, Token.TokenType.VOID_KEYWORD);
         matcherTokenMap.put(boolMatcher, Token.TokenType.BOOL_KEYWORD);
@@ -181,9 +184,6 @@ public class Lexer {
         matcherTokenMap.put(openingCurlyBracketMatcher, Token.TokenType.OPEN_CURLY_BRACKET);
         matcherTokenMap.put(closingBracketMatcher, Token.TokenType.CLOSE_BRACKET);
         matcherTokenMap.put(openingBracketMatcher, Token.TokenType.OPEN_BRACKET);
-        matcherTokenMap.put(bagMatcher, Token.TokenType.BAG_KEYWORD);
-        matcherTokenMap.put(fillMatcher, Token.TokenType.FILL_KEYWORD);
-        matcherTokenMap.put(dotMatcher, Token.TokenType.DOT);
     }
 
     public List<Token> getTokens(String program) throws UnknownSymbolException {
