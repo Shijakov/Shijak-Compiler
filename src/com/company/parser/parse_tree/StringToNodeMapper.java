@@ -18,7 +18,6 @@ public class StringToNodeMapper{
 
         this.map.put("S", () -> new NonTerminalNode(NodeType.S));
         this.map.put("PROGRAM", () -> new NonTerminalNode(NodeType.PROGRAM));
-        this.map.put("FUNCTION_TAIL", () -> new NonTerminalNode(NodeType.FUNCTION_TAIL));
         this.map.put("DEFINITION", () -> new NonTerminalNode(NodeType.DEFINITION));
         this.map.put("DEFINITION_ASSIGNMENT", () -> new NonTerminalNode(NodeType.DEFINITION_ASSIGNMENT));
         this.map.put("FUNCTION", () -> new NonTerminalNode(NodeType.FUNCTION));
@@ -58,10 +57,20 @@ public class StringToNodeMapper{
         this.map.put("RETURN_TYPE", () -> new NonTerminalNode(NodeType.RETURN_TYPE));
         this.map.put("ALLOC_ARR_TYPE", () -> new NonTerminalNode(NodeType.ALLOC_ARR_TYPE));
         this.map.put("TYPE", () -> new NonTerminalNode(NodeType.TYPE));
-        this.map.put("ARRAY_EXTENSION", () -> new NonTerminalNode(NodeType.ARRAY_EXTENSION));
         this.map.put("ARRAY_EMPTY_EXTENSION", () -> new NonTerminalNode(NodeType.ARRAY_EMPTY_EXTENSION));
         this.map.put("PRIMITIVE_TYPE", () -> new NonTerminalNode(NodeType.PRIMITIVE_TYPE));
         this.map.put("PRIMITIVE_CONSTANT", () -> new NonTerminalNode(NodeType.PRIMITIVE_CONSTANT));
+        // NEW VERSION
+        this.map.put("FUNCTION_OR_BAG", () -> new NonTerminalNode(NodeType.FUNCTION_OR_BAG));
+        this.map.put("BAG_DEFINITION", () -> new NonTerminalNode(NodeType.BAG_DEFINITION));
+        this.map.put("BAG_DEFINITION_PARAMETER_LIST", () -> new NonTerminalNode(NodeType.BAG_DEFINITION_PARAMETER_LIST));
+        this.map.put("BAG_DEFINITION_PARAMETER_LIST_TAIL", () -> new NonTerminalNode(NodeType.BAG_DEFINITION_PARAMETER_LIST_TAIL));
+        this.map.put("FILL_STATEMENT", () -> new NonTerminalNode(NodeType.FILL_STATEMENT));
+        this.map.put("BAG_PARAMETER_LIST", () -> new NonTerminalNode(NodeType.BAG_PARAMETER_LIST));
+        this.map.put("BAG_PARAMETER_LIST_TAIL", () -> new NonTerminalNode(NodeType.BAG_PARAMETER_LIST_TAIL));
+        this.map.put("ASSIGNABLE_INSTANCE", () -> new NonTerminalNode(NodeType.ASSIGNABLE_INSTANCE));
+        this.map.put("ASSIGNABLE_INSTANCE_TAIL", () -> new NonTerminalNode(NodeType.ASSIGNABLE_INSTANCE_TAIL));
+        this.map.put("DOT_TAIL", () -> new NonTerminalNode(NodeType.DOT_TAIL));
 
         this.map.put("$", () -> new TerminalNode(TokenType.TERMINAL, "$"));
         this.map.put("define", () -> new TerminalNode(TokenType.DEFINE_KEYWORD, "define"));
@@ -114,6 +123,10 @@ public class StringToNodeMapper{
         this.map.put("bool_constant", () -> new TerminalNode(TokenType.BOOL_CONSTANT, ""));
         this.map.put("int_constant", () -> new TerminalNode(TokenType.INT_CONSTANT, ""));
         this.map.put("float_constant", () -> new TerminalNode(TokenType.FLOAT_CONSTANT, ""));
+        // NEW VERSION
+        this.map.put("fill", () -> new TerminalNode(TokenType.FILL_KEYWORD, "fill"));
+        this.map.put("bag", () -> new TerminalNode(TokenType.BAG_KEYWORD, "bag"));
+        this.map.put(".", () -> new TerminalNode(TokenType.DOT, "."));
     }
 
     public Node getNode(String nodeAsString) {
