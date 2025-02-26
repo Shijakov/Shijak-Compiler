@@ -27,11 +27,14 @@ public class Main {
             ParseTree parseTree = new ParseTree(tokens);
             AbstractSyntaxTree abs = AbstractSyntaxTree.from(parseTree);
             abs.print();
-            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
-            SymbolTable symbolTable = semanticAnalyzer.analyze(abs);
-            String result = Generator.generate(abs, symbolTable);
-            System.out.println(result);
-        } catch (UnexpectedTokenException | UnknownSymbolException | ConstantWithSameNameExistsException | AttemptToChangeConstValueException | VariableNotDeclaredException | VariableAlreadyDeclaredException | FunctionDefinedMultipleTimesException | TypeMismatchException | InHasNoValueException | InvalidTypesForBinaryOperatorException | FunctionDoesntExistException | InvalidArrayCallException | AttemptToFreeAPrimitiveValueException | InvalidReturnTypeException | NotAllPathsHaveAReturnStatementException | BreakNotInLoopException | ContinueNotInLoopException | CannotAssignValueToPointerException e) {
+//            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+//            SymbolTable symbolTable = semanticAnalyzer.analyze(abs);
+//            String result = Generator.generate(abs, symbolTable);
+//            System.out.println(result);
+//        } catch (UnexpectedTokenException | UnknownSymbolException | ConstantWithSameNameExistsException | AttemptToChangeConstValueException | VariableNotDeclaredException | VariableAlreadyDeclaredException | FunctionDefinedMultipleTimesException | TypeMismatchException | InHasNoValueException | InvalidTypesForBinaryOperatorException | FunctionDoesntExistException | InvalidArrayCallException | AttemptToFreeAPrimitiveValueException | InvalidReturnTypeException | NotAllPathsHaveAReturnStatementException | BreakNotInLoopException | ContinueNotInLoopException | CannotAssignValueToPointerException e) {
+//            e.printStackTrace(System.err);
+//        }
+        } catch (Exception e) {
             e.printStackTrace(System.err);
         }
     }

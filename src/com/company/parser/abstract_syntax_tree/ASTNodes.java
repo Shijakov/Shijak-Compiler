@@ -46,11 +46,11 @@ public class ASTNodes {
 
     public static class Program extends ASTNode {
         public ASTNode definition;
-        public ASTNode firstConstruct;
+        public ASTNode constructList;
 
         @Override
         public List<ASTNode> getChildren() {
-            return Arrays.asList(definition, firstConstruct);
+            return Arrays.asList(definition, constructList);
         }
     }
 
@@ -404,7 +404,7 @@ public class ASTNodes {
 
         @Override
         public List<ASTNode> getChildren() {
-            return List.of(expression, callExtension);
+            return List.of(callExtension);
         }
     }
 
@@ -419,7 +419,7 @@ public class ASTNodes {
 
         @Override
         public List<ASTNode> getChildren() {
-            return Arrays.asList(firstChild);
+            return Arrays.asList(firstArgument);
         }
     }
 

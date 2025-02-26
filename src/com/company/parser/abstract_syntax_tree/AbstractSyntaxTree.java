@@ -27,55 +27,38 @@ public class AbstractSyntaxTree {
         return abstractSyntaxTree;
     }
 
-//    PROGRAM ::= DEFINITION FUNCTION FUNCTION_TAIL
-//    PROGRAM ::= FUNCTION FUNCTION_TAIL
+//    PROGRAM ::= DEFINITION FUNCTION_OR_BAG
+//    PROGRAM ::= FUNCTION_OR_BAG
     private static ASTNode convertProgram(Node node) {
         Node first = node.firstChild;
         Node second = first.neighbor;
-        Node third = second.neighbor;
-        ASTNodes.Program program = new ASTNodes.Program();
-        ASTNodes.FunctionList functionList = new ASTNodes.FunctionList();
-        //    PROGRAM ::= FUNCTION FUNCTION_TAIL
-        if (third == null) {
-            functionList.function = convertFunction(first);
-            functionList.nextFunction = convertFunctionList(second);
+        var program = new ASTNodes.Program();
+
+        ASTNode functionOrBag = null;
+
+        //    PROGRAM ::= FUNCTION_OR_BAG
+        if (second == null) {
+            program.constructList = convertFunctionOrBag(first);
         }
         //    PROGRAM ::= DEFINITION FUNCTION FUNCTION_TAIL
         else {
             program.definition = convertDefinition(first);
-            functionList.function = convertFunction(second);
-            functionList.nextFunction = convertFunctionList(third);
+            program.constructList = convertFunctionOrBag(second);
         }
-        program.firstFunction = functionList;
         return program;
-    }
-
-//    FUNCTION_TAIL ::= FUNCTION FUNCTION_TAIL
-//    FUNCTION_TAIL ::= ''
-    private static ASTNode convertFunctionList(Node node) {
-        Node first = node.firstChild;
-        if (first == null) {
-            return null;
-        }
-
-        Node second = first.neighbor;
-        ASTNodes.FunctionList functionList = new ASTNodes.FunctionList();
-        functionList.function = convertFunction(first);
-        functionList.nextFunction = convertFunctionList(second);
-        return functionList;
     }
 
 //    DEFINITION ::= define { DEFINITION_ASSIGNMENT }
     private static ASTNode convertDefinition(Node node) {
         Node definitionAssignment = node.firstChild.neighbor.neighbor;
         ASTNodes.Definition definition = new ASTNodes.Definition();
-        definition.firstDefinition = convertDefinitionAssignmentList(definitionAssignment);
+        definition.firstDefinition = convertDefinitionAssignment(definitionAssignment);
         return definition;
     }
 
 //    DEFINITION_ASSIGNMENT ::= PRIMITIVE_CONSTANT >> identifier ; DEFINITION_ASSIGNMENT
 //    DEFINITION_ASSIGNMENT ::= ''
-    private static ASTNode convertDefinitionAssignmentList(Node node) {
+    private static ASTNode convertDefinitionAssignment(Node node) {
         Node first = node.firstChild;
         if (first == null) {
             return null;
@@ -88,24 +71,84 @@ public class AbstractSyntaxTree {
         ASTNode primitiveConstant = convertPrimitiveConstant(first);
         definitionInstance.identifier = ((ParseTree.TerminalNode) identifier).value;
         definitionInstance.primitiveConstant = primitiveConstant;
-        definitionInstance.nextDefinition = convertDefinitionAssignmentList(definitionAssignment);
+        definitionInstance.nextDefinition = convertDefinitionAssignment(definitionAssignment);
         return definitionInstance;
     }
 
+//    FUNCTION_OR_BAG ::= FUNCTION FUNCTION_OR_BAG
+//    FUNCTION_OR_BAG ::= BAG_DEFINITION FUNCTION_OR_BAG
+//    FUNCTION_OR_BAG ::= ''
+    private static ASTNode convertFunctionOrBag(Node node) {
+        Node first = node.firstChild;
+        if (first == null) {
+            return null;
+        }
+
+        Node second = first.neighbor;
+        var constructList = new ASTNodes.ConstructList();
+        if (first instanceof ParseTree.NonTerminalNode
+                && ((ParseTree.NonTerminalNode) first).nodeType == NodeType.FUNCTION) {
+            constructList.construct = convertFunctionDefinition(first);
+        } else {
+            constructList.construct = convertBagDefinition(first);
+        }
+        constructList.nextConstruct = convertFunctionOrBag(second);
+        return constructList;
+    }
+
+//    BAG_DEFINITION ::= bag identifier { BAG_DEFINITION_PARAMETER_LIST }
+    private static ASTNode convertBagDefinition(Node node) {
+        var identifier = node.firstChild.neighbor;
+        var bagDefinitionParameterList = identifier.neighbor.neighbor;
+
+        var bagDefinition = new ASTNodes.BagDefinition();
+
+        bagDefinition.bagName = ((ParseTree.TerminalNode) node).value;
+        bagDefinition.paramList = convertBagDefinitionParameterList(bagDefinitionParameterList);
+
+        return bagDefinition;
+    }
+
+//    BAG_DEFINITION_PARAMETER_LIST ::= identifier : TYPE BAG_DEFINITION_PARAMETER_LIST_TAIL
+//    BAG_DEFINITION_PARAMETER_LIST_TAIL ::= , identifier : TYPE BAG_DEFINITION_PARAMETER_LIST_TAIL
+//    BAG_DEFINITION_PARAMETER_LIST_TAIL ::= ''
+    private static ASTNode convertBagDefinitionParameterList(Node node) {
+        var identifier = node.firstChild;
+
+        if (identifier == null) {
+            return null;
+        }
+
+        if (identifier instanceof ParseTree.TerminalNode
+                && ((ParseTree.TerminalNode) identifier).tokenType == Token.TokenType.COMMA) {
+            identifier = identifier.neighbor;
+        }
+
+        var type = identifier.neighbor.neighbor;
+        var bagDefinitionParameterListTail = type.neighbor;
+
+        var bagParameter = new ASTNodes.BagParam();
+        bagParameter.identifier = ((ParseTree.TerminalNode) identifier).value;
+        bagParameter.type = convertType(type);
+        bagParameter.nextParam = convertBagDefinitionParameterList(bagDefinitionParameterListTail);
+
+        return bagParameter;
+    }
+
 //    FUNCTION ::= fun identifier ( PARAM_LIST ) : RETURN_TYPE { STATEMENT_LIST }
-    private static ASTNode convertFunction(Node node) {
-        Node identifier = node.firstChild.neighbor;
-        Node paramList = identifier.neighbor.neighbor;
-        Node returnType = paramList.neighbor.neighbor.neighbor;
-        Node stmtList = returnType.neighbor.neighbor;
+    private static ASTNode convertFunctionDefinition(Node node) {
+        var identifier = node.firstChild.neighbor;
+        var paramList = identifier.neighbor.neighbor;
+        var returnType = paramList.neighbor.neighbor.neighbor;
+        var statementList = returnType.neighbor.neighbor;
 
-        ASTNodes.Function function = new ASTNodes.Function();
-        function.name = ((ParseTree.TerminalNode)identifier).value;
-        function.paramList = convertParamList(paramList);
-        function.returnType = convertType(returnType);
-        function.firstStatement = convertStatementList(stmtList);
+        var functionDefinition = new ASTNodes.FunctionDefinition();
+        functionDefinition.functionName = ((ParseTree.TerminalNode) identifier).value;
+        functionDefinition.paramList = convertFunctionParamList(paramList);
+        functionDefinition.returnType = convertType(returnType);
+        functionDefinition.firstStatement = convertStatementList(statementList);
 
-        return function;
+        return functionDefinition;
     }
 
 //    PARAM_LIST ::= identifier : TYPE PARAM_LIST_TAIL
@@ -113,7 +156,7 @@ public class AbstractSyntaxTree {
 //
 //    PARAM_LIST_TAIL ::= , identifier : TYPE PARAM_LIST_TAIL
 //    PARAM_LIST_TAIL ::= ''
-    private static ASTNode convertParamList(Node node) {
+    private static ASTNode convertFunctionParamList(Node node) {
         Node first = node.firstChild;
         if (first == null) {
             return null;
@@ -128,7 +171,7 @@ public class AbstractSyntaxTree {
         ASTNodes.FunctionParam functionParam = new ASTNodes.FunctionParam();
         functionParam.identifier = ((ParseTree.TerminalNode)first).value;
         functionParam.type = convertType(second);
-        functionParam.nextParam = convertParamList(third);
+        functionParam.nextParam = convertFunctionParamList(third);
         return functionParam;
     }
 
@@ -142,7 +185,6 @@ public class AbstractSyntaxTree {
         Node second = first.neighbor;
 
         ASTNodes.Statement statement = new ASTNodes.Statement();
-        statement.nextStatement = convertStatementList(second);
 
         first = (ParseTree.NonTerminalNode) first.firstChild;
 
@@ -150,6 +192,10 @@ public class AbstractSyntaxTree {
             statement.statement = convertWhileStatement(first);
         } else if (first.nodeType == NodeType.IF_STATEMENT) {
             statement.statement = convertIfStatement(first);
+        } else if (first.nodeType == NodeType.BREAK_STATEMENT) {
+            statement.statement = convertBreakStatement(first);
+        } else if (first.nodeType == NodeType.CONTINUE_STATEMENT) {
+            statement.statement = convertContinueStatement(first);
         } else if (first.nodeType == NodeType.EXPRESSION_LIST) {
             statement.statement = convertExpressionList(first);
         } else if (first.nodeType == NodeType.DEFINE_VAR) {
@@ -161,44 +207,62 @@ public class AbstractSyntaxTree {
         } else if (first.nodeType == NodeType.ALLOC_ARR) {
             statement.statement = convertAllocArrStatement(first);
         } else if (first.nodeType == NodeType.FREE_ARR) {
-            statement.statement = convertFreeArrStatement(first);
+            statement.statement = convertFreeStatement(first);
         } else if (first.nodeType == NodeType.RETURN_STATEMENT) {
             statement.statement = convertReturnStatement(first);
-        } else if (first.nodeType == NodeType.BREAK_STATEMENT) {
-            statement.statement = convertBreakStatement(first);
         } else {
-            statement.statement = convertContinueStatement(first);
+            statement.statement = convertFillStatement(first);
         }
+
+        statement.nextStatement = convertStatementList(second);
+
         return statement;
+    }
+
+//    FILL_STATEMENT ::= fill bag identifier >> ASSIGNABLE_INSTANCE ;
+    private static ASTNode convertFillStatement(Node node) {
+        var identifier = node.firstChild.neighbor.neighbor;
+        var assignableInstance = identifier.neighbor.neighbor;
+
+        var filLStatement = new ASTNodes.FillBag();
+        filLStatement.bagName = ((ParseTree.TerminalNode) identifier).value;
+        filLStatement.assignableInstance = convertAssignableInstance(assignableInstance);
+
+        return filLStatement;
     }
 
 //    DEFINE_VAR ::= let identifier : TYPE ;
     private static ASTNode convertDefineVar(Node node) {
-        ParseTree.TerminalNode identifier = (ParseTree.TerminalNode) node.firstChild.neighbor;
-        Node instantiateType = identifier.neighbor.neighbor;
+        var identifier = node.firstChild.neighbor;
+        var instantiateType = identifier.neighbor.neighbor;
+
         ASTNodes.DefineVar defineVar = new ASTNodes.DefineVar();
-        defineVar.identifier = identifier.value;
+        defineVar.identifier = ((ParseTree.TerminalNode) identifier).value;
         defineVar.type = convertType(instantiateType);
 
         return defineVar;
     }
 
-//    ALLOC_ARR ::= alloc ALLOC_ARR_TYPE >> identifier ;
+//    ALLOC_ARR ::= alloc PRIMITIVE_TYPE [ MOD_EXPR ] >> ASSIGNABLE_INSTANCE ;
     private static ASTNode convertAllocArrStatement(Node node) {
-        Node allocArrType = node.firstChild.neighbor;
-        Node identifier = allocArrType.neighbor.neighbor;
-        ASTNodes.AllocArr allocArr = new ASTNodes.AllocArr();
-        allocArr.identifier = ((ParseTree.TerminalNode) identifier).value;
-        allocArr.allocArrType = convertAllocArrType(allocArrType);
+       var primitiveType = node.firstChild.neighbor;
+       var expression = primitiveType.neighbor.neighbor;
+       var assignableInstance = expression.neighbor.neighbor;
 
-        return allocArr;
+       var allocArrStatement = new ASTNodes.AllocArr();
+       allocArrStatement.type = convertPrimitiveType(primitiveType);
+       allocArrStatement.expression = convertExpression(expression);
+       allocArrStatement.assignableInstance = convertAssignableInstance(assignableInstance);
+
+       return allocArrStatement;
     }
 
-//    FREE_ARR ::= free identifier ;
-    private static ASTNode convertFreeArrStatement(Node node) {
-        Node identifier = node.firstChild.neighbor;
-        ASTNodes.FreeArr freeArr = new ASTNodes.FreeArr();
-        freeArr.identifier = ((ParseTree.TerminalNode) identifier).value;
+//    FREE_ARR ::= free ASSIGNABLE_INSTANCE ;
+    private static ASTNode convertFreeStatement(Node node) {
+        var assignableInstance = node.firstChild.neighbor;
+
+        var freeArr = new ASTNodes.FreeInstance();
+        freeArr.assignableInstance = convertAssignableInstance(assignableInstance);
 
         return freeArr;
     }
@@ -218,22 +282,14 @@ public class AbstractSyntaxTree {
         return new ASTNodes.Continue();
     }
 
-//    INPUT_STATEMENT ::= input identifier ARRAY_EXTENSION ;
+//    INPUT_STATEMENT ::= input ASSIGNABLE_INSTANCE ;
     private static ASTNode convertInputStatement(Node node) {
-        Node identifier = node.firstChild.neighbor;
-        Node arrExt = identifier.neighbor;
-        ASTNodes.Input input = new ASTNodes.Input();
-        if (arrExt.firstChild == null) {
-            ASTNodes.Identifier returnIdentifier = new ASTNodes.Identifier();
-            returnIdentifier.value = ((ParseTree.TerminalNode) identifier).value;
-            input.identifier = returnIdentifier;
-        } else {
-            // ARRAY_CALL
-            ASTNodes.ArrayCall arrayCall = new ASTNodes.ArrayCall();
-            arrayCall.identifier = ((ParseTree.TerminalNode) identifier).value;
-            arrayCall.callIdx = convertArrayExtension(arrExt);
-            input.identifier = arrayCall;
-        }
+        var assignableInstance = node.firstChild.neighbor;
+
+        var input = new ASTNodes.Input();
+
+        input.assignableInstance = convertAssignableInstance(assignableInstance);
+
         return input;
     }
 
@@ -241,7 +297,7 @@ public class AbstractSyntaxTree {
     private static ASTNode convertOutputStatement(Node node) {
         Node expr = node.firstChild.neighbor;
         ASTNodes.Output output = new ASTNodes.Output();
-        output.node = convertExpression(expr);
+        output.expression = convertExpression(expr);
         return output;
     }
 
@@ -347,17 +403,16 @@ public class AbstractSyntaxTree {
     }
 
 //    CLOSER ::= return
-//    CLOSER ::= eq identifier ARRAY_EXTENSION
+//    CLOSER ::= eq ASSIGNABLE_INSTANCE
     private static ASTNode convertCloser(Node node) {
         Node first = node.firstChild;
         if (((ParseTree.TerminalNode)first).tokenType == Token.TokenType.RETURN_KEYWORD) {
             return new ASTNodes.Return();
         } else {
-            ParseTree.TerminalNode identifier = (ParseTree.TerminalNode)first.neighbor;
-            Node arrExt = identifier.neighbor;
-            ASTNodes.Eq eq = new ASTNodes.Eq();
-            eq.identifier = identifier.value;
-            eq.arrCall = convertArrayExtension(arrExt);
+            var assignableInstance = first.neighbor;
+
+            var eq = new ASTNodes.Eq();
+            eq.assignableInstance = convertAssignableInstance(assignableInstance);
             return eq;
         }
     }
@@ -407,7 +462,7 @@ public class AbstractSyntaxTree {
                     }
                 } else {
                     ASTNodes.BinaryOperator expression = new ASTNodes.BinaryOperator();
-                    expression.value = ((ParseTree.TerminalNode) mid.firstChild).value;
+                    expression.operator = ((ParseTree.TerminalNode) mid.firstChild).value;
                     expression.right = convertedMidExpression;
                     if (((ParseTree.NonTerminalNode) left).nodeType == NodeType.PRIMARY) {
                         expression.left = convertPrimary(left);
@@ -427,7 +482,7 @@ public class AbstractSyntaxTree {
                 }
             } else {
                 ASTNodes.BinaryOperator expression = new ASTNodes.BinaryOperator();
-                expression.value = ((ParseTree.TerminalNode) right.firstChild).value;
+                expression.operator = ((ParseTree.TerminalNode) right.firstChild).value;
                 expression.right = convertedRightExpression;
                 if (((ParseTree.NonTerminalNode)mid).nodeType == NodeType.PRIMARY) {
                     expression.left = convertPrimary(mid);
@@ -464,7 +519,7 @@ public class AbstractSyntaxTree {
 
         if (right == null) {
             ASTNodes.UnaryOperator not = new ASTNodes.UnaryOperator();
-            not.value = "!";
+            not.operator = "!";
             not.left = convertPrimary(mid);
             return not;
         } else {
@@ -476,6 +531,10 @@ public class AbstractSyntaxTree {
 //    INSTANCE ::= identifier INSTANCE_TAIL
 //    INSTANCE_TAIL ::= ( EXPR_LIST )
 //    INSTANCE_TAIL ::= ARRAY_EXTENSION
+
+//    INSTANCE ::= identifier INSTANCE_TAIL
+//    INSTANCE_TAIL ::= ( EXPR_LIST )
+//    INSTANCE_TAIL ::= ASSIGNABLE_INSTANCE_TAIL
     private static ASTNode convertInstance(Node node) {
         Node identifier = node.firstChild;
         Node instanceTail = identifier.neighbor;
@@ -484,21 +543,65 @@ public class AbstractSyntaxTree {
             // EXPR_LIST
             ASTNodes.FunctionCall functionCall =  new ASTNodes.FunctionCall();
             functionCall.identifier = ((ParseTree.TerminalNode) identifier).value;
-            functionCall.firstChild = convertFunctionCall(tailChild.neighbor);
+            functionCall.firstArgument = convertFunctionCall(tailChild.neighbor);
             return functionCall;
         } else {
-            if (tailChild.firstChild == null) {
-                ASTNodes.Identifier returnIdentifier = new ASTNodes.Identifier();
-                returnIdentifier.value = ((ParseTree.TerminalNode)identifier).value;
-                return returnIdentifier;
-            } else {
-                // ARRAY_CALL
-                ASTNodes.ArrayCall arrayCall = new ASTNodes.ArrayCall();
-                arrayCall.identifier = ((ParseTree.TerminalNode) identifier).value;
-                arrayCall.callIdx = convertArrayExtension(tailChild);
-                return arrayCall;
-            }
+            var variable = new ASTNodes.Variable();
+            variable.name = ((ParseTree.TerminalNode) identifier).value;
+            variable.callExtension = convertAssignableInstanceTail(tailChild);
+
+            return variable;
         }
+    }
+
+//    ASSIGNABLE_INSTANCE ::= identifier ASSIGNABLE_INSTANCE_TAIL
+    private static ASTNode convertAssignableInstance(Node node) {
+        var identifier = node.firstChild;
+        var assignableInstanceTail = identifier.neighbor;
+
+        var assignableInstance = new ASTNodes.Variable();
+        assignableInstance.name = ((ParseTree.TerminalNode) identifier).value;
+        assignableInstance.callExtension = convertAssignableInstanceTail(assignableInstanceTail);
+
+        return assignableInstance;
+    }
+
+//    ASSIGNABLE_INSTANCE_TAIL ::= [ MOD_EXPR ] DOT_TAIL
+//    ASSIGNABLE_INSTANCE_TAIL ::= DOT_TAIL
+    private static ASTNode convertAssignableInstanceTail(Node node) {
+        var first = node.firstChild;
+
+        if (first instanceof ParseTree.TerminalNode) {
+            var expression = first.neighbor;
+            var dotTail = expression.neighbor.neighbor;
+
+            var arrayCallExtension = new ASTNodes.ArrayCallExtension();
+            arrayCallExtension.expression = convertExpression(expression);
+            arrayCallExtension.callExtension = convertDotTail(dotTail);
+
+            return arrayCallExtension;
+        } else {
+            return convertDotTail(first);
+        }
+    }
+
+//    DOT_TAIL ::= . identifier ASSIGNABLE_INSTANCE_TAIL
+//    DOT_TAIL ::= ''
+    private static ASTNode convertDotTail(Node node) {
+        var first = node.firstChild;
+
+        if (first == null) {
+            return null;
+        }
+
+        var identifier = first.neighbor;
+        var assignableInstanceTail = identifier.neighbor;
+
+        var bagCallExtension = new ASTNodes.BagCallExtension();
+        bagCallExtension.fieldName = ((ParseTree.TerminalNode) identifier).value;
+        bagCallExtension.callExtension = convertAssignableInstanceTail(assignableInstanceTail);
+
+        return bagCallExtension;
     }
 
 //    EXPR_LIST ::= EXPRESSION EXPR_LIST_TAIL
@@ -508,10 +611,10 @@ public class AbstractSyntaxTree {
         if (first == null) {
             return null;
         }
-        ASTNodes.FunctionCallIdx functionCallIdx = new ASTNodes.FunctionCallIdx();
-        functionCallIdx.expression = convertExpression(first);
-        functionCallIdx.next = convertFunctionCallTail(first.neighbor);
-        return functionCallIdx;
+        var argument = new ASTNodes.FunctionCallArgument();
+        argument.expression = convertExpression(first);
+        argument.next = convertFunctionCallTail(first.neighbor);
+        return argument;
     }
 
 //    EXPR_LIST_TAIL ::= , EXPRESSION EXPR_LIST_TAIL
@@ -521,12 +624,12 @@ public class AbstractSyntaxTree {
         if (first == null) {
             return null;
         }
-        ASTNodes.FunctionCallIdx functionCallIdx = new ASTNodes.FunctionCallIdx();
-        ASTNode convertedExpression = convertExpression(first.neighbor);
-        ASTNode next = convertFunctionCallTail(first.neighbor.neighbor);
-        functionCallIdx.expression = convertedExpression;
-        functionCallIdx.next = next;
-        return functionCallIdx;
+
+        var argument = new ASTNodes.FunctionCallArgument();
+        argument.expression = convertExpression(first.neighbor);
+        argument.next = convertFunctionCallTail(first.neighbor.neighbor);
+
+        return argument;
     }
 
 //    RETURN_TYPE ::= TYPE
@@ -536,75 +639,50 @@ public class AbstractSyntaxTree {
     private static ASTNode convertType(Node node) {
         Node first = node.firstChild;
         if (first.isTerminal) {
+            //    RETURN_TYPE ::= void
             return new ASTNodes.VoidType();
         }
 
-        if (((ParseTree.NonTerminalNode) first).nodeType == NodeType.TYPE) {
-            first = first.firstChild;
-        }
+        var primitiveType = first.firstChild;
 
-        Node arrEmptyExt = first.neighbor.firstChild;
+//        ARRAY_EMPTY_EXTENSION ::= [ ]
+//        ARRAY_EMPTY_EXTENSION ::= ''
+        var arrEmptyExt = primitiveType.neighbor.firstChild;
         boolean hasArrExt = arrEmptyExt != null;
 
-        if (((ParseTree.TerminalNode)first.firstChild).tokenType == Token.TokenType.BOOL_KEYWORD) {
-            ASTNodes.BoolType type = new ASTNodes.BoolType();
-            type.arrExt = hasArrExt;
-            return type;
-        } else if (((ParseTree.TerminalNode)first.firstChild).tokenType == Token.TokenType.CHAR_KEYWORD) {
-            ASTNodes.CharType type = new ASTNodes.CharType();
-            type.arrExt = hasArrExt;
-            return type;
-        } else if (((ParseTree.TerminalNode)first.firstChild).tokenType == Token.TokenType.INT_KEYWORD) {
-            ASTNodes.IntType type = new ASTNodes.IntType();
-            type.arrExt = hasArrExt;
-            return type;
-        } else {
-            ASTNodes.FloatType type = new ASTNodes.FloatType();
-            type.arrExt = hasArrExt;
-            return type;
-        }
+        var type = (ASTNodes.Type) convertPrimitiveType(primitiveType);
+
+        type.hasArrayExtension = hasArrExt;
+        return type;
     }
 
-//    INSTANTIATE_TYPE ::= PRIMITIVE_TYPE [ MOD_EXPR ]
-    private static ASTNode convertAllocArrType(Node node) {
-        Node first = node.firstChild;
-        Node expr = first.neighbor.neighbor;
+//    PRIMITIVE_TYPE ::= int
+//    PRIMITIVE_TYPE ::= float
+//    PRIMITIVE_TYPE ::= char
+//    PRIMITIVE_TYPE ::= bool
+//    PRIMITIVE_TYPE ::= bag identifier
+    private static ASTNode convertPrimitiveType(Node node) {
+        var primitiveTypeName = (ParseTree.TerminalNode) node.firstChild;
 
-        ASTNodes.ArrayCallIdx callIdx = new ASTNodes.ArrayCallIdx();
-        callIdx.expression = convertExpression(expr);
-
-        if (((ParseTree.TerminalNode)first.firstChild).tokenType == Token.TokenType.BOOL_KEYWORD) {
-            ASTNodes.BoolInitType type = new ASTNodes.BoolInitType();
-            type.arrExt = callIdx;
-            return type;
-        } else if (((ParseTree.TerminalNode)first.firstChild).tokenType == Token.TokenType.CHAR_KEYWORD) {
-            ASTNodes.CharInitType type = new ASTNodes.CharInitType();
-            type.arrExt = callIdx;
-            return type;
-        } else if (((ParseTree.TerminalNode)first.firstChild).tokenType == Token.TokenType.INT_KEYWORD) {
-            ASTNodes.IntInitType type = new ASTNodes.IntInitType();
-            type.arrExt = callIdx;
-            return type;
+        if (primitiveTypeName.tokenType == Token.TokenType.BOOL_KEYWORD) {
+            // PRIMITIVE_TYPE ::= bool
+            return new ASTNodes.BoolType();
+        } else if (primitiveTypeName.tokenType == Token.TokenType.CHAR_KEYWORD) {
+            // PRIMITIVE_TYPE ::= char
+            return new ASTNodes.CharType();
+        } else if (primitiveTypeName.tokenType == Token.TokenType.INT_KEYWORD) {
+            // PRIMITIVE_TYPE ::= int
+            return new ASTNodes.IntType();
+        } else if (primitiveTypeName.tokenType == Token.TokenType.FLOAT_KEYWORD) {
+            // PRIMITIVE_TYPE ::= float
+            return new ASTNodes.FloatType();
         } else {
-            ASTNodes.FloatInitType type = new ASTNodes.FloatInitType();
-            type.arrExt = callIdx;
-            return type;
-        }
-    }
+            // PRIMITIVE_TYPE ::= bag identifier
+            var primitiveType = new ASTNodes.BagType();
+            primitiveType.bagName = ((ParseTree.TerminalNode) primitiveTypeName.neighbor).value;
 
-//    ARRAY_EXTENSION ::= [ MOD_EXPR ]
-//    ARRAY_EXTENSION ::= ''
-    private static ASTNode convertArrayExtension(Node node) {
-        Node first = node.firstChild;
-        if (first == null) {
-            return null;
+            return primitiveType;
         }
-
-        Node expr = first.neighbor;
-        ASTNode convertedExpr = convertExpression(expr);
-        ASTNodes.ArrayCallIdx arrayCallIdx = new ASTNodes.ArrayCallIdx();
-        arrayCallIdx.expression = convertedExpr;
-        return arrayCallIdx;
     }
 
 //    PRIMITIVE_CONSTANT ::= char_constant
@@ -658,9 +736,9 @@ public class AbstractSyntaxTree {
         }
     }
     private static ExprType isMulOrDiv(ASTNodes.BinaryOperator operator) {
-        if (operator.value.equals("*") || operator.value.equals("/")) {
+        if (operator.operator.equals("*") || operator.operator.equals("/")) {
             return ExprType.MUL;
-        } else if (operator.value.equals("+") || operator.value.equals("-")) {
+        } else if (operator.operator.equals("+") || operator.operator.equals("-")) {
             return ExprType.ADD;
         } else {
             return ExprType.OTHER;
@@ -678,7 +756,7 @@ public class AbstractSyntaxTree {
         }
 
         if (node instanceof ASTNodes.Output output) {
-            output.node = transformAllExpressions(output.node);
+            output.expression = transformAllExpressions(output.expression);
         } else if (node instanceof ASTNodes.While whileNode) {
             whileNode.condition = transformAllExpressions(whileNode.condition);
             transformAllExpressions(whileNode.firstStatement);
