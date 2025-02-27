@@ -204,7 +204,7 @@ public class LL1Table {
     public void fillForStatement() {
         putInTable(NodeType.STATEMENT, TokenType.IDENTIFIER, "EXPRESSION_LIST");
         putInTable(NodeType.STATEMENT, TokenType.OPEN_BRACKET, "EXPRESSION_LIST");
-        putInTable(NodeType.STATEMENT_LIST, TokenType.FILL_KEYWORD, "FILL_STATEMENT");
+        putInTable(NodeType.STATEMENT, TokenType.FILL_KEYWORD, "FILL_STATEMENT");
         putInTable(NodeType.STATEMENT, TokenType.LET_KEYWORD, "DEFINE_VAR");
         putInTable(NodeType.STATEMENT, TokenType.ALLOC_KEYWORD, "ALLOC_ARR");
         putInTable(NodeType.STATEMENT, TokenType.FREE_KEYWORD, "FREE_ARR");

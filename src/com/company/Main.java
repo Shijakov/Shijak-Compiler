@@ -1,6 +1,6 @@
 package com.company;
 
-import com.company.code_generator.Generator;
+//import com.company.code_generator.Generator;
 import com.company.dev_exceptions.ErrorInGenerationException;
 import com.company.dev_exceptions.ScopeNotFoundException;
 import com.company.exceptions.*;
@@ -8,8 +8,8 @@ import com.company.lexer.Lexer;
 import com.company.lexer.Token;
 import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
 import com.company.parser.parse_tree.ParseTree;
-import com.company.semantic_analyzer.SemanticAnalyzer;
-import com.company.symbol_table.SymbolTable;
+//import com.company.semantic_analyzer.SemanticAnalyzer;
+//import com.company.symbol_table.SymbolTable;
 
 import java.util.List;
 
@@ -18,8 +18,37 @@ public class Main {
     public static void main(String[] args) throws ErrorInGenerationException, ScopeNotFoundException {
         Lexer lexer = new Lexer();
         String program = """
+                bag a {
+                    name: char[],
+                    age: int
+                }
+                
                 fun main(): void {
-                    output (1 == 2) && (2 == (3 + 4 - 5));
+                    let dang: bag a[];
+                    let i: int;
+                    alloc bag a[10] >> dang;
+                    fill bag a { } >> dang[0];
+           
+                    23 >> eq dang[0].age;
+                    
+                    alloc char[5] >> dang[0].name;
+                    'F' >> eq dang[0].name[0];
+                    'I' >> eq dang[0].name[1];
+                    'L' >> eq dang[0].name[2];
+                    'I' >> eq dang[0].name[3];
+                    'P' >> eq dang[0].name[4];
+                    
+                    output 'N';
+                    output ' ';
+                    
+                    while (i < 5) {
+                        output dang[0].name[i];
+                    }
+                    
+                    output ' ';
+                    output 'A';
+                    
+                    output dang[0].age;
                 }
                 """;
         try {

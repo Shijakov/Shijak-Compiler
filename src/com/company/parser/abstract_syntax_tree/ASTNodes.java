@@ -463,6 +463,11 @@ public class ASTNodes {
         public boolean hasArrayExtension;
 
         @Override
+        public String getNodeType() {
+            return this.getClass().getSimpleName() + (hasArrayExtension ? "[]" : "");
+        }
+
+        @Override
         public List<ASTNode> getChildren() {
             return List.of();
         }

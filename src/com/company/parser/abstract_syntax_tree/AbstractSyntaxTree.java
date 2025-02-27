@@ -22,7 +22,9 @@ public class AbstractSyntaxTree {
     public static AbstractSyntaxTree from(ParseTree parseTree) {
         AbstractSyntaxTree abstractSyntaxTree = new AbstractSyntaxTree();
         abstractSyntaxTree.root = convertProgram(parseTree.root.firstChild);
+        // Mirror expressionList tree so statements would generate in right order
         transformExpressionLists(abstractSyntaxTree.root);
+        // Mirror expression tree so statements would generate in right order
         transformAllExpressions(abstractSyntaxTree.root);
         return abstractSyntaxTree;
     }
@@ -33,8 +35,6 @@ public class AbstractSyntaxTree {
         Node first = node.firstChild;
         Node second = first.neighbor;
         var program = new ASTNodes.Program();
-
-        ASTNode functionOrBag = null;
 
         //    PROGRAM ::= FUNCTION_OR_BAG
         if (second == null) {
@@ -103,7 +103,7 @@ public class AbstractSyntaxTree {
 
         var bagDefinition = new ASTNodes.BagDefinition();
 
-        bagDefinition.bagName = ((ParseTree.TerminalNode) node).value;
+        bagDefinition.bagName = ((ParseTree.TerminalNode) identifier).value;
         bagDefinition.paramList = convertBagDefinitionParameterList(bagDefinitionParameterList);
 
         return bagDefinition;
@@ -637,13 +637,19 @@ public class AbstractSyntaxTree {
 //
 //    TYPE ::= PRIMITIVE_TYPE ARRAY_EMPTY_EXTENSION
     private static ASTNode convertType(Node node) {
-        Node first = node.firstChild;
-        if (first.isTerminal) {
-            //    RETURN_TYPE ::= void
-            return new ASTNodes.VoidType();
+        var typeNode = node;
+        if (((ParseTree.NonTerminalNode)node).nodeType == NodeType.RETURN_TYPE) {
+            if (node.firstChild instanceof ParseTree.TerminalNode) {
+                // RETURN_TYPE ::= void
+                return new ASTNodes.VoidType();
+            }
+            // RETURN_TYPE ::= TYPE
+            typeNode = node.firstChild;
         }
 
-        var primitiveType = first.firstChild;
+        // TYPE ::= PRIMITIVE_TYPE ARRAY_EMPTY_EXTENSION
+
+        var primitiveType = typeNode.firstChild;
 
 //        ARRAY_EMPTY_EXTENSION ::= [ ]
 //        ARRAY_EMPTY_EXTENSION ::= ''
