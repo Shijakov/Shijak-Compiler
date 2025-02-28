@@ -76,7 +76,6 @@ public class LL1Table {
         fillForExprList();
         fillForExprListTail();
         fillForReturnType();
-        fillForAllocArrType();
         fillForType();
         fillForArrayEmptyExtension();
         fillForPrimitiveType();
@@ -87,8 +86,6 @@ public class LL1Table {
         fillForBagDefinitionParameterList();
         fillForBagDefinitionParameterListTail();
         fillForFillStatement();
-        fillForBagParameterList();
-        fillForBagParameterListTail();
         fillForAssignableInstance();
         fillForAssignableInstanceTail();
         fillForDotTail();
@@ -156,6 +153,7 @@ public class LL1Table {
     }
 
     private void fillForBagDefinitionParameterList() {
+        putInTable(NodeType.BAG_DEFINITION_PARAMETER_LIST, TokenType.CLOSE_CURLY_BRACKET, "");
         putInTable(NodeType.BAG_DEFINITION_PARAMETER_LIST, TokenType.IDENTIFIER, "identifier : TYPE BAG_DEFINITION_PARAMETER_LIST_TAIL");
     }
 
@@ -224,17 +222,7 @@ public class LL1Table {
     }
 
     private void fillForFillStatement() {
-        putInTable(NodeType.FILL_STATEMENT, TokenType.FILL_KEYWORD, "fill bag identifier { BAG_PARAMETER_LIST } >> ASSIGNABLE_INSTANCE ;");
-    }
-
-    private void fillForBagParameterList() {
-        putInTable(NodeType.BAG_PARAMETER_LIST, TokenType.CLOSE_CURLY_BRACKET, "");
-        putInTable(NodeType.BAG_PARAMETER_LIST, TokenType.IDENTIFIER, "identifier : EXPRESSION BAG_PARAMETER_LIST_TAIL");
-    }
-
-    private void fillForBagParameterListTail() {
-        putInTable(NodeType.BAG_PARAMETER_LIST_TAIL, TokenType.CLOSE_CURLY_BRACKET, "");
-        putInTable(NodeType.BAG_PARAMETER_LIST_TAIL, TokenType.COMMA, ", identifier : EXPRESSION BAG_PARAMETER_LIST_TAIL");
+        putInTable(NodeType.FILL_STATEMENT, TokenType.FILL_KEYWORD, "fill bag identifier >> ASSIGNABLE_INSTANCE ;");
     }
 
     public void fillForDefineVar() {
@@ -242,7 +230,7 @@ public class LL1Table {
     }
 
     public void fillForAllocArr() {
-        putInTable(NodeType.ALLOC_ARR, TokenType.ALLOC_KEYWORD, "alloc ALLOC_ARR_TYPE >> ASSIGNABLE_INSTANCE ;");
+        putInTable(NodeType.ALLOC_ARR, TokenType.ALLOC_KEYWORD, "alloc PRIMITIVE_TYPE [ MOD_EXPR ] >> ASSIGNABLE_INSTANCE ;");
     }
 
     public void fillForFreeArr() {
@@ -491,12 +479,13 @@ public class LL1Table {
     }
 
     public void fillForInstanceTail() {
-        putInTable(NodeType.INSTANCE_TAIL, TokenType.CLOSE_CURLY_BRACKET, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.EXPRESSION_OPERATOR, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.SEMI_COLON, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.COMMA, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.OPEN_BRACKET, "( EXPR_LIST )");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.CLOSE_BRACKET, "ASSIGNABLE_INSTANCE_TAIL");
+        putInTable(NodeType.INSTANCE_TAIL, TokenType.OPEN_SQUARE_BRACKET, "ASSIGNABLE_INSTANCE_TAIL");
+        putInTable(NodeType.INSTANCE_TAIL, TokenType.CLOSE_SQUARE_BRACKET, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.GREATER_EQUAL_OPERATOR, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.LESS_EQUAL_OPERATOR, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.LESS_OPERATOR, "ASSIGNABLE_INSTANCE_TAIL");
@@ -510,8 +499,6 @@ public class LL1Table {
         putInTable(NodeType.INSTANCE_TAIL, TokenType.MULTIPLICATION_OPERATOR, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.DIVISION_OPERATOR, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.AND_OPERATOR, "ASSIGNABLE_INSTANCE_TAIL");
-        putInTable(NodeType.INSTANCE_TAIL, TokenType.OPEN_SQUARE_BRACKET, "ASSIGNABLE_INSTANCE_TAIL");
-        putInTable(NodeType.INSTANCE_TAIL, TokenType.CLOSE_SQUARE_BRACKET, "ASSIGNABLE_INSTANCE_TAIL");
         putInTable(NodeType.INSTANCE_TAIL, TokenType.DOT, "ASSIGNABLE_INSTANCE_TAIL");
     }
 
@@ -520,11 +507,12 @@ public class LL1Table {
     }
 
     public void fillForAssignableInstanceTail() {
-        putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.CLOSE_CURLY_BRACKET, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.EXPRESSION_OPERATOR, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.SEMI_COLON, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.COMMA, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.CLOSE_BRACKET, "DOT_TAIL");
+        putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.OPEN_SQUARE_BRACKET, "[ MOD_EXPR ] DOT_TAIL");
+        putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.CLOSE_SQUARE_BRACKET, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.GREATER_EQUAL_OPERATOR, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.LESS_EQUAL_OPERATOR, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.LESS_OPERATOR, "DOT_TAIL");
@@ -538,17 +526,15 @@ public class LL1Table {
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.MULTIPLICATION_OPERATOR, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.DIVISION_OPERATOR, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.AND_OPERATOR, "DOT_TAIL");
-        putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.OPEN_SQUARE_BRACKET, "[ MOD_EXPR ] DOT_TAIL");
-        putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.CLOSE_SQUARE_BRACKET, "DOT_TAIL");
         putInTable(NodeType.ASSIGNABLE_INSTANCE_TAIL, TokenType.DOT, "DOT_TAIL");
     }
 
     public void fillForDotTail() {
-        putInTable(NodeType.DOT_TAIL, TokenType.CLOSE_CURLY_BRACKET, "");
         putInTable(NodeType.DOT_TAIL, TokenType.EXPRESSION_OPERATOR, "");
         putInTable(NodeType.DOT_TAIL, TokenType.SEMI_COLON, "");
         putInTable(NodeType.DOT_TAIL, TokenType.COMMA, "");
         putInTable(NodeType.DOT_TAIL, TokenType.CLOSE_BRACKET, "");
+        putInTable(NodeType.DOT_TAIL, TokenType.CLOSE_SQUARE_BRACKET, "");
         putInTable(NodeType.DOT_TAIL, TokenType.GREATER_EQUAL_OPERATOR, "");
         putInTable(NodeType.DOT_TAIL, TokenType.LESS_EQUAL_OPERATOR, "");
         putInTable(NodeType.DOT_TAIL, TokenType.LESS_OPERATOR, "");
@@ -562,7 +548,6 @@ public class LL1Table {
         putInTable(NodeType.DOT_TAIL, TokenType.MULTIPLICATION_OPERATOR, "");
         putInTable(NodeType.DOT_TAIL, TokenType.DIVISION_OPERATOR, "");
         putInTable(NodeType.DOT_TAIL, TokenType.AND_OPERATOR, "");
-        putInTable(NodeType.DOT_TAIL, TokenType.CLOSE_SQUARE_BRACKET, "");
         putInTable(NodeType.DOT_TAIL, TokenType.DOT, ". identifier ASSIGNABLE_INSTANCE_TAIL");
     }
 
@@ -579,50 +564,42 @@ public class LL1Table {
     }
 
     public void fillForExprListTail() {
-        putInTable(NodeType.EXPR_LIST_TAIL, TokenType.CLOSE_BRACKET, "");
         putInTable(NodeType.EXPR_LIST_TAIL, TokenType.COMMA, ", EXPRESSION EXPR_LIST_TAIL");
+        putInTable(NodeType.EXPR_LIST_TAIL, TokenType.CLOSE_BRACKET, "");
     }
 
     public void fillForReturnType() {
+        putInTable(NodeType.RETURN_TYPE, TokenType.BAG_KEYWORD, "TYPE");
         putInTable(NodeType.RETURN_TYPE, TokenType.VOID_KEYWORD, "void");
         putInTable(NodeType.RETURN_TYPE, TokenType.FLOAT_KEYWORD, "TYPE");
         putInTable(NodeType.RETURN_TYPE, TokenType.INT_KEYWORD, "TYPE");
         putInTable(NodeType.RETURN_TYPE, TokenType.CHAR_KEYWORD, "TYPE");
         putInTable(NodeType.RETURN_TYPE, TokenType.BOOL_KEYWORD, "TYPE");
-        putInTable(NodeType.RETURN_TYPE, TokenType.BAG_KEYWORD, "TYPE");
-    }
-
-    public void fillForAllocArrType() {
-        putInTable(NodeType.ALLOC_ARR_TYPE, TokenType.FLOAT_KEYWORD, "PRIMITIVE_TYPE [ MOD_EXPR ]");
-        putInTable(NodeType.ALLOC_ARR_TYPE, TokenType.INT_KEYWORD, "PRIMITIVE_TYPE [ MOD_EXPR ]");
-        putInTable(NodeType.ALLOC_ARR_TYPE, TokenType.CHAR_KEYWORD, "PRIMITIVE_TYPE [ MOD_EXPR ]");
-        putInTable(NodeType.ALLOC_ARR_TYPE, TokenType.BOOL_KEYWORD, "PRIMITIVE_TYPE [ MOD_EXPR ]");
-        putInTable(NodeType.ALLOC_ARR_TYPE, TokenType.BAG_KEYWORD, "PRIMITIVE_TYPE [ MOD_EXPR ]");
     }
 
     public void fillForType() {
+        putInTable(NodeType.TYPE, TokenType.BAG_KEYWORD, "PRIMITIVE_TYPE ARRAY_EMPTY_EXTENSION");
         putInTable(NodeType.TYPE, TokenType.FLOAT_KEYWORD, "PRIMITIVE_TYPE ARRAY_EMPTY_EXTENSION");
         putInTable(NodeType.TYPE, TokenType.INT_KEYWORD, "PRIMITIVE_TYPE ARRAY_EMPTY_EXTENSION");
         putInTable(NodeType.TYPE, TokenType.CHAR_KEYWORD, "PRIMITIVE_TYPE ARRAY_EMPTY_EXTENSION");
         putInTable(NodeType.TYPE, TokenType.BOOL_KEYWORD, "PRIMITIVE_TYPE ARRAY_EMPTY_EXTENSION");
-        putInTable(NodeType.TYPE, TokenType.BAG_KEYWORD, "PRIMITIVE_TYPE ARRAY_EMPTY_EXTENSION");
     }
 
     public void fillForArrayEmptyExtension() {
         putInTable(NodeType.ARRAY_EMPTY_EXTENSION, TokenType.OPEN_CURLY_BRACKET, "");
         putInTable(NodeType.ARRAY_EMPTY_EXTENSION, TokenType.CLOSE_CURLY_BRACKET, "");
         putInTable(NodeType.ARRAY_EMPTY_EXTENSION, TokenType.SEMI_COLON, "");
-        putInTable(NodeType.ARRAY_EMPTY_EXTENSION, TokenType.CLOSE_BRACKET, "");
         putInTable(NodeType.ARRAY_EMPTY_EXTENSION, TokenType.COMMA, "");
+        putInTable(NodeType.ARRAY_EMPTY_EXTENSION, TokenType.CLOSE_BRACKET, "");
         putInTable(NodeType.ARRAY_EMPTY_EXTENSION, TokenType.OPEN_SQUARE_BRACKET, "[ ]");
     }
 
     public void fillForPrimitiveType() {
+        putInTable(NodeType.PRIMITIVE_TYPE, TokenType.BAG_KEYWORD, "bag identifier");
         putInTable(NodeType.PRIMITIVE_TYPE, TokenType.FLOAT_KEYWORD, "float");
         putInTable(NodeType.PRIMITIVE_TYPE, TokenType.INT_KEYWORD, "int");
         putInTable(NodeType.PRIMITIVE_TYPE, TokenType.CHAR_KEYWORD, "char");
         putInTable(NodeType.PRIMITIVE_TYPE, TokenType.BOOL_KEYWORD, "bool");
-        putInTable(NodeType.PRIMITIVE_TYPE, TokenType.BAG_KEYWORD, "bag identifier");
     }
 
     public void fillForPrimitiveConstant() {

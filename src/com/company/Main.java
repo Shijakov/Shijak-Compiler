@@ -27,7 +27,7 @@ public class Main {
                     let dang: bag a[];
                     let i: int;
                     alloc bag a[10] >> dang;
-                    fill bag a { } >> dang[0];
+                    fill bag a >> dang[0];
            
                     23 >> eq dang[0].age;
                     

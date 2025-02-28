@@ -110,6 +110,7 @@ public class AbstractSyntaxTree {
     }
 
 //    BAG_DEFINITION_PARAMETER_LIST ::= identifier : TYPE BAG_DEFINITION_PARAMETER_LIST_TAIL
+//    BAG_DEFINITION_PARAMETER_LIST ::= ''
 //    BAG_DEFINITION_PARAMETER_LIST_TAIL ::= , identifier : TYPE BAG_DEFINITION_PARAMETER_LIST_TAIL
 //    BAG_DEFINITION_PARAMETER_LIST_TAIL ::= ''
     private static ASTNode convertBagDefinitionParameterList(Node node) {
@@ -246,7 +247,7 @@ public class AbstractSyntaxTree {
 //    ALLOC_ARR ::= alloc PRIMITIVE_TYPE [ MOD_EXPR ] >> ASSIGNABLE_INSTANCE ;
     private static ASTNode convertAllocArrStatement(Node node) {
        var primitiveType = node.firstChild.neighbor;
-       var expression = primitiveType.neighbor.neighbor;
+       var expression = primitiveType.neighbor.neighbor.neighbor;
        var assignableInstance = expression.neighbor.neighbor;
 
        var allocArrStatement = new ASTNodes.AllocArr();

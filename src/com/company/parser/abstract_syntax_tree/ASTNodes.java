@@ -216,21 +216,21 @@ public class ASTNodes {
     public static class Return extends ASTNode {
         @Override
         public List<ASTNode> getChildren() {
-            return List.of();
+            return Arrays.asList();
         }
     }
 
     public static class Break extends ASTNode {
         @Override
         public List<ASTNode> getChildren() {
-            return List.of();
+            return Arrays.asList();
         }
     }
 
     public static class Continue extends ASTNode {
         @Override
         public List<ASTNode> getChildren() {
-            return List.of();
+            return Arrays.asList();
         }
     }
 
@@ -272,23 +272,7 @@ public class ASTNodes {
 
         @Override
         public List<ASTNode> getChildren() {
-            return List.of(firstFillBagArgument, assignableInstance);
-        }
-    }
-
-    public static class FillBagArgument extends ASTNode {
-        public String field;
-        public ASTNode expression;
-        public ASTNode next;
-
-        @Override
-        public String getName() {
-            return field;
-        }
-
-        @Override
-        public List<ASTNode> getChildren() {
-            return List.of(expression, next);
+            return Arrays.asList(firstFillBagArgument, assignableInstance);
         }
     }
 
@@ -322,7 +306,7 @@ public class ASTNodes {
     public static class InKeyword extends ASTNode {
         @Override
         public List<ASTNode> getChildren() {
-            return List.of();
+            return Arrays.asList();
         }
     }
 
@@ -379,7 +363,7 @@ public class ASTNodes {
 
         @Override
         public List<ASTNode> getChildren() {
-            return List.of(callExtension);
+            return Arrays.asList(callExtension);
         }
     }
 
@@ -389,7 +373,7 @@ public class ASTNodes {
 
         @Override
         public List<ASTNode> getChildren() {
-            return List.of(expression, callExtension);
+            return Arrays.asList(expression, callExtension);
         }
     }
 
@@ -404,7 +388,7 @@ public class ASTNodes {
 
         @Override
         public List<ASTNode> getChildren() {
-            return List.of(callExtension);
+            return Arrays.asList(callExtension);
         }
     }
 
@@ -443,7 +427,7 @@ public class ASTNodes {
 
         @Override
         public List<ASTNode> getChildren() {
-            return List.of();
+            return Arrays.asList();
         }
     }
 
@@ -469,7 +453,7 @@ public class ASTNodes {
 
         @Override
         public List<ASTNode> getChildren() {
-            return List.of();
+            return Arrays.asList();
         }
     }
 
@@ -497,7 +481,7 @@ public class ASTNodes {
     public static class VoidType extends ASTNode {
         @Override
         public List<ASTNode> getChildren() {
-            return List.of();
+            return Arrays.asList();
         }
     }
 }

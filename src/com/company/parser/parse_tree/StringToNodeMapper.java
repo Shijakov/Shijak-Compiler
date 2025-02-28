@@ -55,7 +55,6 @@ public class StringToNodeMapper{
         this.map.put("EXPR_LIST", () -> new NonTerminalNode(NodeType.EXPR_LIST));
         this.map.put("EXPR_LIST_TAIL", () -> new NonTerminalNode(NodeType.EXPR_LIST_TAIL));
         this.map.put("RETURN_TYPE", () -> new NonTerminalNode(NodeType.RETURN_TYPE));
-        this.map.put("ALLOC_ARR_TYPE", () -> new NonTerminalNode(NodeType.ALLOC_ARR_TYPE));
         this.map.put("TYPE", () -> new NonTerminalNode(NodeType.TYPE));
         this.map.put("ARRAY_EMPTY_EXTENSION", () -> new NonTerminalNode(NodeType.ARRAY_EMPTY_EXTENSION));
         this.map.put("PRIMITIVE_TYPE", () -> new NonTerminalNode(NodeType.PRIMITIVE_TYPE));
@@ -66,8 +65,6 @@ public class StringToNodeMapper{
         this.map.put("BAG_DEFINITION_PARAMETER_LIST", () -> new NonTerminalNode(NodeType.BAG_DEFINITION_PARAMETER_LIST));
         this.map.put("BAG_DEFINITION_PARAMETER_LIST_TAIL", () -> new NonTerminalNode(NodeType.BAG_DEFINITION_PARAMETER_LIST_TAIL));
         this.map.put("FILL_STATEMENT", () -> new NonTerminalNode(NodeType.FILL_STATEMENT));
-        this.map.put("BAG_PARAMETER_LIST", () -> new NonTerminalNode(NodeType.BAG_PARAMETER_LIST));
-        this.map.put("BAG_PARAMETER_LIST_TAIL", () -> new NonTerminalNode(NodeType.BAG_PARAMETER_LIST_TAIL));
         this.map.put("ASSIGNABLE_INSTANCE", () -> new NonTerminalNode(NodeType.ASSIGNABLE_INSTANCE));
         this.map.put("ASSIGNABLE_INSTANCE_TAIL", () -> new NonTerminalNode(NodeType.ASSIGNABLE_INSTANCE_TAIL));
         this.map.put("DOT_TAIL", () -> new NonTerminalNode(NodeType.DOT_TAIL));
