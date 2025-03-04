@@ -6,7 +6,7 @@
 //import com.company.parser.abstract_syntax_tree.ASTNodes;
 //import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
 //import com.company.symbol_table.SymbolTable;
-//import com.company.symbol_table.VarType;
+//import com.company.symbol_table.variable_types.VarType;
 //
 //import java.util.*;
 //import java.util.function.Supplier;

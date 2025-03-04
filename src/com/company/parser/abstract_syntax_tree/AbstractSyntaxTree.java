@@ -247,8 +247,8 @@ public class AbstractSyntaxTree {
 //    ALLOC_ARR ::= alloc PRIMITIVE_TYPE [ MOD_EXPR ] >> ASSIGNABLE_INSTANCE ;
     private static ASTNode convertAllocArrStatement(Node node) {
        var primitiveType = node.firstChild.neighbor;
-       var expression = primitiveType.neighbor.neighbor.neighbor;
-       var assignableInstance = expression.neighbor.neighbor;
+       var expression = primitiveType.neighbor.neighbor;
+       var assignableInstance = expression.neighbor.neighbor.neighbor;
 
        var allocArrStatement = new ASTNodes.AllocArr();
        allocArrStatement.type = convertPrimitiveType(primitiveType);

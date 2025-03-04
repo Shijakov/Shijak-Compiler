@@ -1,6 +1,6 @@
 package com.company.exceptions;
 
-import com.company.symbol_table.VarType;
+import com.company.symbol_table.variable_types.VarType;
 
 public class TypeMismatchException extends Exception {
     public TypeMismatchException(VarType expected, VarType actual) {

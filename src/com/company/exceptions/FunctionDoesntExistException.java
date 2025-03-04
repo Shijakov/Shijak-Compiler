@@ -1,6 +1,6 @@
 package com.company.exceptions;
 
-import com.company.symbol_table.VarType;
+import com.company.symbol_table.variable_types.VarType;
 
 import java.util.List;
 import java.util.stream.Collectors;

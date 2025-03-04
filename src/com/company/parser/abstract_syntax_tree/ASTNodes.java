@@ -1,7 +1,7 @@
 package com.company.parser.abstract_syntax_tree;
 
 import com.company.symbol_table.SymbolTable;
-import com.company.symbol_table.VarType;
+import com.company.symbol_table.variable_types.VarType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -443,7 +443,10 @@ public class ASTNodes {
     public static class FloatConstant extends Constant {
     }
 
-    public static abstract class Type extends ASTNode {
+    public static abstract class TypeOrVoid extends ASTNode {
+    }
+
+    public static abstract class Type extends TypeOrVoid {
         public boolean hasArrayExtension;
 
         @Override
@@ -478,7 +481,7 @@ public class ASTNodes {
         }
     }
 
-    public static class VoidType extends ASTNode {
+    public static class VoidType extends TypeOrVoid {
         @Override
         public List<ASTNode> getChildren() {
             return Arrays.asList();

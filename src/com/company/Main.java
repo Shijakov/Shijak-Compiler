@@ -8,16 +8,23 @@ import com.company.lexer.Lexer;
 import com.company.lexer.Token;
 import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
 import com.company.parser.parse_tree.ParseTree;
-//import com.company.semantic_analyzer.SemanticAnalyzer;
-//import com.company.symbol_table.SymbolTable;
+import com.company.semantic_analyzer.SemanticAnalyzer;
+import com.company.symbol_table.SymbolTable;
 
 import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) throws ErrorInGenerationException, ScopeNotFoundException {
-        Lexer lexer = new Lexer();
         String program = """
+                define {
+                    1000 >> max_val;
+                    'c' >> carcence;
+                }
+
+                fun calc(): void {
+                }
+
                 bag a {
                     name: char[],
                     age: int
@@ -28,36 +35,42 @@ public class Main {
                     let i: int;
                     alloc bag a[10] >> dang;
                     fill bag a >> dang[0];
-           
+
                     23 >> eq dang[0].age;
-                    
+
                     alloc char[5] >> dang[0].name;
                     'F' >> eq dang[0].name[0];
                     'I' >> eq dang[0].name[1];
                     'L' >> eq dang[0].name[2];
                     'I' >> eq dang[0].name[3];
                     'P' >> eq dang[0].name[4];
-                    
+
                     output 'N';
                     output ' ';
-                    
+
                     while (i < 5) {
                         output dang[0].name[i];
                     }
-                    
+
                     output ' ';
                     output 'A';
-                    
+
                     output dang[0].age;
+
+                    output dang[0].age + dang[5].age;
+
+                    free dang;
                 }
                 """;
         try {
+            Lexer lexer = new Lexer();
             List<Token> tokens = lexer.getTokens(program);
             ParseTree parseTree = new ParseTree(tokens);
             AbstractSyntaxTree abs = AbstractSyntaxTree.from(parseTree);
             abs.print();
-//            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
-//            SymbolTable symbolTable = semanticAnalyzer.analyze(abs);
+            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+            SymbolTable symbolTable = semanticAnalyzer.analyze(abs);
+
 //            String result = Generator.generate(abs, symbolTable);
 //            System.out.println(result);
 //        } catch (UnexpectedTokenException | UnknownSymbolException | ConstantWithSameNameExistsException | AttemptToChangeConstValueException | VariableNotDeclaredException | VariableAlreadyDeclaredException | FunctionDefinedMultipleTimesException | TypeMismatchException | InHasNoValueException | InvalidTypesForBinaryOperatorException | FunctionDoesntExistException | InvalidArrayCallException | AttemptToFreeAPrimitiveValueException | InvalidReturnTypeException | NotAllPathsHaveAReturnStatementException | BreakNotInLoopException | ContinueNotInLoopException | CannotAssignValueToPointerException e) {
