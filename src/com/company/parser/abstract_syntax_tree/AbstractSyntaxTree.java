@@ -532,10 +532,6 @@ public class AbstractSyntaxTree {
 //    INSTANCE ::= identifier INSTANCE_TAIL
 //    INSTANCE_TAIL ::= ( EXPR_LIST )
 //    INSTANCE_TAIL ::= ARRAY_EXTENSION
-
-//    INSTANCE ::= identifier INSTANCE_TAIL
-//    INSTANCE_TAIL ::= ( EXPR_LIST )
-//    INSTANCE_TAIL ::= ASSIGNABLE_INSTANCE_TAIL
     private static ASTNode convertInstance(Node node) {
         Node identifier = node.firstChild;
         Node instanceTail = identifier.neighbor;

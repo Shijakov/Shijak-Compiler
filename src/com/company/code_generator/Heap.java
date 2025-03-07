@@ -29,6 +29,14 @@ public class Heap {
         }
     }
 
+    /**
+     * This function reads the beginning of heap memory and stores it in variables
+     * heapStart and heapEnd (at the beginning the variables point at the same spot in memory
+     * because no heap memory has been used yet). After that in the heapStart memory location
+     * it stores a value of -1 so that it is known where the memory start is.
+     * @param sb The StringBuilder that contains all the generated mips code
+     * @param shared The shared runtime
+     */
     public void initialize(StringBuilder sb, SharedRuntime shared) {
         CommandRunner.runCommand(sb, "li", List.of("$a0", "0"));
         CommandRunner.runCommand(sb, "li", List.of("$v0", "9"));

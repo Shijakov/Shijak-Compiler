@@ -10,7 +10,9 @@ import com.company.parser.abstract_syntax_tree.helpers.PrimitiveToTypeConverter;
 import com.company.parser.abstract_syntax_tree.helpers.TypeToTypeConverter;
 import com.company.symbol_table.SymbolTable;
 import com.company.symbol_table.variable_types.*;
+import com.sun.jdi.DoubleType;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -156,13 +158,13 @@ public class SemanticAnalyzer {
     }
 
     private void analyzeWhileStatement(ASTNodes.While node) throws Exception {
-        VarType type = analyzeExpression(node.condition, null);
+        VarType type = analyzeExpression(node.condition, null, node, "condition");
         assertTypesEqual(new BoolType(false), type);
         analyzeStatement((ASTNodes.Statement) node.firstStatement);
     }
 
     private void analyzeIfStatement(ASTNodes.If node) throws Exception {
-        VarType type = analyzeExpression(node.condition, null);
+        VarType type = analyzeExpression(node.condition, null, node, "condition");
         assertTypesEqual(new BoolType(false), type);
         analyzeStatement((ASTNodes.Statement) node.firstStatement);
         analyzeElse(node.elif);
@@ -173,7 +175,7 @@ public class SemanticAnalyzer {
             return;
         }
         if (node instanceof ASTNodes.Elif) {
-            VarType type = analyzeExpression(((ASTNodes.Elif) node).condition, null);
+            VarType type = analyzeExpression(((ASTNodes.Elif) node).condition, null, node, "condition");
             assertTypesEqual(new BoolType(false), type);
             analyzeStatement((ASTNodes.Statement) ((ASTNodes.Elif) node).firstStatement);
             analyzeElse(((ASTNodes.Elif) node).elif);
@@ -195,7 +197,7 @@ public class SemanticAnalyzer {
             analyzeEqStatement((ASTNodes.Eq) node.exprOrCloser, type);
             return null;
         } else {
-            return analyzeExpression(node.exprOrCloser, type);
+            return analyzeExpression(node.exprOrCloser, type, node, "exprOrCloser");
         }
     }
 
@@ -207,7 +209,7 @@ public class SemanticAnalyzer {
     private void analyzeAllocArrStatement(ASTNodes.AllocArr node) throws Exception {
         VarType type = typeToTypeConverter.apply((ASTNodes.Type) node.type);
 
-        var expressionType = analyzeExpression(node.expression, null);
+        var expressionType = analyzeExpression(node.expression, null, node, "expression");
         if (!expressionType.equals(new IntType())) {
             throw new TypeMismatchException(new IntType(), expressionType);
         }
@@ -241,6 +243,30 @@ public class SemanticAnalyzer {
     private Pair<SymbolTable.VarOrConstInfo, VarType> analyzeVariable(ASTNodes.Variable node) throws Exception {
         var varOrConstInfo = symbolTable.varLookup(node.scope, node.name, node.time);
 
+        if (varOrConstInfo instanceof SymbolTable.ConstInfo) {
+            if (node.callExtension != null) {
+                throw new AttemptedToDrillConstantException(varOrConstInfo.name);
+            }
+
+            ASTNodes.Constant newNode = null;
+            if (varOrConstInfo.type instanceof IntType) {
+                newNode = new ASTNodes.IntConstant();
+                newNode.value = ((SymbolTable.ConstInfo) varOrConstInfo).value;
+            } else if (varOrConstInfo.type instanceof BoolType) {
+                newNode = new ASTNodes.BoolConstant();
+                newNode.value = ((SymbolTable.ConstInfo) varOrConstInfo).value;
+            } else if (varOrConstInfo.type instanceof FloatType) {
+                newNode = new ASTNodes.FloatConstant();
+                newNode.value = ((SymbolTable.ConstInfo) varOrConstInfo).value;
+            } else if (varOrConstInfo.type instanceof CharType) {
+                newNode = new ASTNodes.CharConstant();
+                newNode.value = ((SymbolTable.ConstInfo) varOrConstInfo).value;
+            }
+            node.parent = newNode;
+
+            return new Pair<>(varOrConstInfo, varOrConstInfo.type);
+        }
+
         var result = varOrConstInfo.type;
         if (node.callExtension instanceof ASTNodes.ArrayCallExtension) {
             result = analyzeArrayCallExtension((ASTNodes.ArrayCallExtension) node.callExtension, varOrConstInfo.type);
@@ -259,7 +285,7 @@ public class SemanticAnalyzer {
         }
 
         var drilledType = VarType.arrayDrilled(calledWithType);
-        var expressionType = analyzeExpression(node.expression, null);
+        var expressionType = analyzeExpression(node.expression, null, node, "expression");
         if (!expressionType.equals(new IntType())) {
             throw new TypeMismatchException(new IntType(), expressionType);
         }
@@ -300,7 +326,7 @@ public class SemanticAnalyzer {
         var varRez = analyzeVariable((ASTNodes.Variable) node.assignableInstance);
 
         if (varRez.first instanceof SymbolTable.ConstInfo) {
-            throw new AttemptToFreeAPrimitiveValueException(varRez.first.name);
+            throw new AttemptToChangeConstValueException(varRez.first.name);
         }
 
         if (!VarType.isPrimitive(varRez.second)) {
@@ -309,7 +335,7 @@ public class SemanticAnalyzer {
     }
 
     private void analyzeOutputStatement(ASTNodes.Output node) throws Exception {
-        var expressionType = analyzeExpression(node.expression, null);
+        var expressionType = analyzeExpression(node.expression, null, node, "expression");
         if (!VarType.isPrimitive(expressionType)) {
             throw new AttemptedToOutputNonPrimitiveType(expressionType);
         }
@@ -344,13 +370,47 @@ public class SemanticAnalyzer {
          }
     }
 
-    private VarType analyzeExpression(ASTNodes.ASTNode node, VarType inValue) throws Exception {
+    private void swapConstVariableWithVariable(ASTNodes.ASTNode parent, ASTNodes.ASTNode nodeBeingReplaced, String fieldName, SymbolTable.ConstInfo constInfo) throws GeneralDevException {
+        ASTNodes.Constant newNode = null;
+        if (constInfo.type instanceof IntType) {
+            newNode = new ASTNodes.IntConstant();
+            newNode.value = constInfo.value;
+        } else if (constInfo.type instanceof BoolType) {
+            newNode = new ASTNodes.BoolConstant();
+            newNode.value = constInfo.value;
+        } else if (constInfo.type instanceof FloatType) {
+            newNode = new ASTNodes.FloatConstant();
+            newNode.value = constInfo.value;
+        } else if (constInfo.type instanceof CharType) {
+            newNode = new ASTNodes.CharConstant();
+            newNode.value = constInfo.value;
+        }
+
+        newNode.time = nodeBeingReplaced.time;
+        newNode.parent = nodeBeingReplaced.parent;
+        newNode.scope = nodeBeingReplaced.scope;
+        newNode.returnResultType = nodeBeingReplaced.returnResultType;
+
+        try {
+            Field field = parent.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(parent, newNode);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new GeneralDevException("Field name doesnt exist");
+        }
+    }
+
+    private VarType analyzeExpression(ASTNodes.ASTNode node, VarType inValue, ASTNodes.ASTNode parent, String calledWithField) throws Exception {
         if (node instanceof ASTNodes.BinaryOperator) {
             return analyzeBinaryOperator((ASTNodes.BinaryOperator) node, inValue);
         } else if (node instanceof ASTNodes.UnaryOperator) {
             return analyzeUnaryOperator((ASTNodes.UnaryOperator) node, inValue);
         } else if (node instanceof ASTNodes.Variable) {
-            return analyzeVariable((ASTNodes.Variable) node).second;
+            var rez = analyzeVariable((ASTNodes.Variable) node);
+            if (rez.first instanceof SymbolTable.ConstInfo) {
+                swapConstVariableWithVariable(parent, node, calledWithField, (SymbolTable.ConstInfo) rez.first);
+            }
+            return rez.second;
         } else if (node instanceof ASTNodes.FunctionCall) {
             return analyzeFunctionCall((ASTNodes.FunctionCall) node, inValue);
         } else if (node instanceof ASTNodes.Constant) {
@@ -367,7 +427,7 @@ public class SemanticAnalyzer {
         List<VarType> paramTypes = new ArrayList<>();
         ASTNodes.FunctionCallArgument arg = (ASTNodes.FunctionCallArgument) node.firstArgument;
         while (arg != null) {
-            paramTypes.add(analyzeExpression(arg.expression, inValue));
+            paramTypes.add(analyzeExpression(arg.expression, inValue, arg, "expression"));
             arg = (ASTNodes.FunctionCallArgument) arg.next;
         }
         SymbolTable.FunInfo funInfo = symbolTable.funLookup(node.identifier, paramTypes);
@@ -375,7 +435,7 @@ public class SemanticAnalyzer {
     }
 
     private VarType analyzeUnaryOperator(ASTNodes.UnaryOperator node, VarType inValue) throws Exception {
-        VarType type = analyzeExpression(node.left, inValue);
+        VarType type = analyzeExpression(node.left, inValue, node, "left");
         if (!type.equals(new BoolType())) {
             throw new TypeMismatchException(new BoolType(), type);
         }
@@ -383,8 +443,8 @@ public class SemanticAnalyzer {
     }
 
     private VarType analyzeBinaryOperator(ASTNodes.BinaryOperator node, VarType inValue) throws Exception {
-        VarType left = analyzeExpression(node.left, inValue);
-        VarType right = analyzeExpression(node.right, inValue);
+        VarType left = analyzeExpression(node.left, inValue, node, "left");
+        VarType right = analyzeExpression(node.right, inValue, node, "right");
         Matcher arithmeticSign = Pattern.compile("[+\\-*/]").matcher(node.operator);
         Matcher moduloSign = Pattern.compile("%").matcher(node.operator);
         Matcher comparatorSign = Pattern.compile("(<=|<|>=|>|==|!=)").matcher(node.operator);

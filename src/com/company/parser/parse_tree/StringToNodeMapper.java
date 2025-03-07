@@ -127,6 +127,7 @@ public class StringToNodeMapper{
     }
 
     public Node getNode(String nodeAsString) {
+        System.out.println(nodeAsString);
         return this.map.get(nodeAsString).get();
     }
 }

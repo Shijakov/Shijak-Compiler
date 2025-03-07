@@ -438,7 +438,7 @@ public class LL1Table {
         putInTable(NodeType.MUL_EXPR, TokenType.CHAR_CONSTANT, "PRIMARY MUL_EXPR_TAIL");
         putInTable(NodeType.MUL_EXPR, TokenType.BOOL_CONSTANT, "PRIMARY MUL_EXPR_TAIL");
         putInTable(NodeType.MUL_EXPR, TokenType.INT_CONSTANT, "PRIMARY MUL_EXPR_TAIL");
-        putInTable(NodeType.MUL_EXPR, TokenType.FLOAT_CONSTANT, "PRIMARY MUL_EXPR_TAI");
+        putInTable(NodeType.MUL_EXPR, TokenType.FLOAT_CONSTANT, "PRIMARY MUL_EXPR_TAIL");
     }
 
     public void fillForMulExprTail() {

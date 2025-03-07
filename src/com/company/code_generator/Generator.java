@@ -6,6 +6,9 @@
 //import com.company.parser.abstract_syntax_tree.ASTNodes;
 //import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
 //import com.company.symbol_table.SymbolTable;
+//import com.company.symbol_table.variable_types.CharType;
+//import com.company.symbol_table.variable_types.FloatType;
+//import com.company.symbol_table.variable_types.IntType;
 //import com.company.symbol_table.variable_types.VarType;
 //
 //import java.util.*;
@@ -27,7 +30,7 @@
 //
 //        heap.initializeProcedures(sb, shared);
 //
-//        generateForFunctionList((ASTNodes.FunctionList) node.firstFunction, sb, shared, heap);
+//        generateForConstructList((ASTNodes.ConstructList) node.constructList, sb, shared, heap);
 //        sb.append("$END:\n").append("li $v0, 10\n").append("syscall");
 //    }
 //
@@ -72,19 +75,21 @@
 //        generateForDefinitionInstance((ASTNodes.DefinitionInstance) node.nextDefinition, sb, shared, heap);
 //    }
 //
-//    private static void generateForFunctionList(ASTNodes.FunctionList node, StringBuilder sb, SharedRuntime shared, Heap heap) throws ErrorInGenerationException {
+//    private static void generateForConstructList(ASTNodes.ConstructList node, StringBuilder sb, SharedRuntime shared, Heap heap) throws ErrorInGenerationException {
 //        if (node == null) {
 //            return;
 //        }
-//        generateForFunction((ASTNodes.Function) node.function, sb, shared, heap);
-//        generateForFunctionList((ASTNodes.FunctionList) node.nextFunction, sb, shared, heap);
+//        if (node.construct instanceof ASTNodes.FunctionDefinition) {
+//            generateForFunction((ASTNodes.FunctionDefinition) node.construct, sb, shared, heap);
+//        }
+//        generateForConstructList((ASTNodes.ConstructList) node.nextConstruct, sb, shared, heap);
 //    }
 //
-//    private static void generateForFunction(ASTNodes.Function node, StringBuilder sb, SharedRuntime shared, Heap heap) throws ErrorInGenerationException {
-//        CommandRunner.runCommand(sb, "#==================================" + node.name + "================================", List.of());
-//        CommandRunner.runCommand(sb, node.name + ":", List.of());
+//    private static void generateForFunction(ASTNodes.FunctionDefinition node, StringBuilder sb, SharedRuntime shared, Heap heap) throws ErrorInGenerationException {
+//        CommandRunner.runCommand(sb, "#==================================" + node.functionName + "================================", List.of());
+//        CommandRunner.runCommand(sb, node.functionName + ":", List.of());
 //
-//        Runtime funRuntime = functionActivationRecords.get(node.name).get();
+//        Runtime funRuntime = functionActivationRecords.get(node.functionName).get();
 //
 //        funRuntime.bootstrap(sb);
 //
@@ -92,7 +97,7 @@
 //
 //        funRuntime.eraseUsedSpace(sb);
 //
-//        if (node.name.equals("main")) {
+//        if (node.functionName.equals("main")) {
 //            sb.append("j $END\n");
 //        } else {
 //            sb.append("jr $ra\n");
@@ -121,16 +126,31 @@
 //            generateForInputStatement((ASTNodes.Input) node.statement, sb, runtime, shared, heap);
 //        } else if (node.statement instanceof ASTNodes.AllocArr) {
 //            generateForAllocStatement((ASTNodes.AllocArr) node.statement, sb, runtime, shared, heap);
-//        } else if (node.statement instanceof ASTNodes.FreeArr) {
-//            generateForFreeStatement((ASTNodes.FreeArr) node.statement, sb, runtime, shared, heap);
+//        } else if (node.statement instanceof ASTNodes.FreeInstance) {
+//            generateForFreeStatement((ASTNodes.FreeInstance) node.statement, sb, runtime, shared, heap);
 //        } else if (node.statement instanceof ASTNodes.Return) {
 //            generateForReturnCloser((ASTNodes.Return) node.statement, sb, runtime, shared, heap);
+//        } else if (node.statement instanceof ASTNodes.FillBag) {
+//            generateForFillBagStatement((ASTNodes.FillBag) node.statement, sb, runtime, shared, heap);
 //        }
 //        generateForStatement((ASTNodes.Statement) node.nextStatement, sb, runtime, shared, heap);
 //    }
 //
+//    private static void generateForVariable(ASTNodes.Variable node, StringBuilder sb, Runtime runtime, SharedRuntime shared, Heap heap) throws ErrorInGenerationException {
+//        if (node == null) {
+//            return;
+//        }
+//        if (node.info instanceof SymbolTable.ConstInfo) {
+//            generateForConstantVariable(node, sb, run)
+//        }
+//        var variable = runtime.getVariable(node.name);
+//
+//
+//    }
+//
 //    private static void generateForAllocStatement(ASTNodes.AllocArr node, StringBuilder sb, Runtime runtime, SharedRuntime shared, Heap heap) throws ErrorInGenerationException {
 //        ASTNodes.ArrayCallIdx callIdx = (ASTNodes.ArrayCallIdx) ((ASTNodes.InitType) node.allocArrType).arrExt;
+//
 //        Pair<Integer, SyscallType> varInMem = runtime.getVariable(node.identifier);
 //        generateForExpression(callIdx.expression, sb, runtime, shared, heap);
 //        CommandRunner.runCommand(sb, "mul", List.of(shared.wordAcc, shared.wordAcc, "4"));
@@ -543,6 +563,34 @@
 //        runtime.restoreRegisters(sb);
 //    }
 //
+//    private static void generateForVariable(ASTNodes.Variable node, StringBuilder sb, Runtime runtime, SharedRuntime shared, Heap heap) {
+//        Pair<Integer, SyscallType> var = runtime.getVariable(node.name);
+//
+//        if (var.second == SyscallType.FLOAT) {
+//            CommandRunner.runCommand(sb, "l.s", List.of(shared.floatAcc, String.format("%d($sp)", var.first)));
+//            runtime.accType = Coprocessor.FLOAT;
+//            runtime.accSyscallType = SyscallType.FLOAT;
+//        } else if (var.second == SyscallType.INTEGER) {
+//            CommandRunner.runCommand(sb, "lw", List.of(shared.wordAcc, String.format("%d($sp)", var.first)));
+//            runtime.accType = Coprocessor.WORD;
+//            runtime.accSyscallType = SyscallType.INTEGER;
+//        } else if (var.second == SyscallType.CHAR) {
+//            CommandRunner.runCommand(sb, "lw", List.of(shared.wordAcc, String.format("%d($sp)", var.first)));
+//            runtime.accType = Coprocessor.WORD;
+//            runtime.accSyscallType = SyscallType.CHAR;
+//        } else {
+//            CommandRunner.runCommand(sb, "lw", List.of(shared.wordAcc, String.format("%d($sp)", var.first)));
+//            runtime.accType = Coprocessor.WORD;
+//            if (var.second == SyscallType.FLOAT_POINTER) {
+//                runtime.accSyscallType = SyscallType.FLOAT_POINTER;
+//            } else if (var.second == SyscallType.INTEGER_POINTER) {
+//                runtime.accSyscallType = SyscallType.INTEGER_POINTER;
+//            } else {
+//                runtime.accSyscallType = SyscallType.CHAR_POINTER;
+//            }
+//        }
+//    }
+//
 //    private static void generateForIdentifier(ASTNodes.Identifier node, StringBuilder sb, Runtime runtime, SharedRuntime shared, Heap heap) {
 //        if (node.info instanceof SymbolTable.ConstInfo) {
 //            if (node.info.type.type == VarType.PrimitiveType.FLOAT) {
@@ -693,18 +741,14 @@
 //
 //    private static void getFunctionParameters(List<SymbolTable.FunParam> funParams, List<Pair<String, SyscallType>> arguments) {
 //        for (SymbolTable.FunParam param : funParams) {
-//            if (param.type.type == VarType.PrimitiveType.FLOAT && !param.type.arrExt) {
+//            if (param.type.equals(new FloatType())) {
 //                arguments.add(new Pair<>(param.name, SyscallType.FLOAT));
-//            } else if (param.type.type == VarType.PrimitiveType.CHAR && !param.type.arrExt) {
+//            } else if (param.type.equals(new CharType())) {
 //                arguments.add(new Pair<>(param.name, SyscallType.CHAR));
-//            } else if (param.type.type == VarType.PrimitiveType.INT && !param.type.arrExt) {
+//            } else if (param.type.equals(new IntType())) {
 //                arguments.add(new Pair<>(param.name, SyscallType.INTEGER));
-//            } else if (param.type.type == VarType.PrimitiveType.FLOAT) {
-//                arguments.add(new Pair<>(param.name, SyscallType.FLOAT_POINTER));
-//            } else if (param.type.type == VarType.PrimitiveType.CHAR) {
-//                arguments.add(new Pair<>(param.name, SyscallType.CHAR_POINTER));
-//            } else if (param.type.type == VarType.PrimitiveType.INT) {
-//                arguments.add(new Pair<>(param.name, SyscallType.INTEGER_POINTER));
+//            } else {
+//                arguments.add(new Pair<>(param.name, SyscallType.INTEGER));
 //            }
 //        }
 //    }
@@ -720,7 +764,7 @@
 //            SymbolTable.Table table = (SymbolTable.Table) symbolTable.findScope(funInfo.scopeId);
 //            getLocalVariables(table, localVariables);
 //
-//            Coprocessor returnType = funInfo.returnType.type == VarType.PrimitiveType.FLOAT ? Coprocessor.FLOAT : Coprocessor.WORD;
+//            Coprocessor returnType = funInfo.returnType.equals(new FloatType()) ? Coprocessor.FLOAT : Coprocessor.WORD;
 //
 //            functionActivationRecords.put(funInfo.funName, () -> new Runtime(arguments, localVariables, returnType));
 //
