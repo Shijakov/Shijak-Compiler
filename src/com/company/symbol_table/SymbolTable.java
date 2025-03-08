@@ -1,7 +1,9 @@
 package com.company.symbol_table;
 
+import com.company.dev_exceptions.GeneralDevException;
 import com.company.dev_exceptions.ScopeNotFoundException;
 import com.company.exceptions.*;
+import com.company.model.Pair;
 import com.company.symbol_table.variable_types.VarType;
 
 import java.util.HashMap;
@@ -81,7 +83,7 @@ public class SymbolTable {
     public static class BagInfo {
         public String bagName;
         public List<BagParam> params;
-        public HashMap<String, Integer> fieldToIndexMap;
+        public HashMap<String, Pair<Integer, VarType>> fieldToIndexMap;
 
         public BagInfo(String bagName, List<BagParam> params) {
             this.bagName = bagName;
@@ -90,14 +92,21 @@ public class SymbolTable {
             fieldToIndexMap = new HashMap<>();
             int nextIdx = 0;
             for (BagParam param : params) {
-                fieldToIndexMap.put(param.name, nextIdx);
+                fieldToIndexMap.put(param.name, new Pair<>(nextIdx, param.type));
                 nextIdx++;
             }
         }
 
-        public VarType getFieldType(String fieldName) {
-            var field = this.params.stream().filter((param) -> param.name.equals(fieldName)).findFirst();
-            return field.map(bagParam -> bagParam.type).orElse(null);
+        public Pair<Integer, VarType> getField(String fieldName) throws GeneralDevException {
+            var rez = fieldToIndexMap.get(fieldName);
+            if (rez == null) {
+                throw new GeneralDevException(String.format("Field %s doesnt exist on bag %s", fieldName, bagName));
+            }
+            return rez;
+        }
+
+        public Integer getNumFields() {
+            return params.size();
         }
     }
 
@@ -238,15 +247,10 @@ public class SymbolTable {
         return constant;
     }
 
-    public FunInfo funLookup(String funName, List<VarType> parameterTypes) throws FunctionDoesntExistException {
+    public FunInfo funLookup(String funName) throws FunctionDoesntExistException {
         FunInfo fun = root.funRow.get(funName);
-        if (fun == null || fun.params.size() != parameterTypes.size()) {
-            throw new FunctionDoesntExistException(funName, parameterTypes);
-        }
-        for (int i = 0 ; i < fun.params.size() ; i++) {
-            if (!parameterTypes.get(i).equals(fun.params.get(i).type)) {
-                throw new FunctionDoesntExistException(funName, parameterTypes);
-            }
+        if (fun == null) {
+            throw new FunctionDoesntExistException(funName, List.of());
         }
         return fun;
     }

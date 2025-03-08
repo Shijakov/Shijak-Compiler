@@ -32,7 +32,6 @@ public class SharedRuntime {
     final String heapTmpPointer = "$s4";
     final String heapMemSizeRequestRegister = "$s5";
     final String heapArithmeticTmp = "$t0";
-    Map<String, Coprocessor> functionReturnTypes = new HashMap<>();
     int ifCount = 0;
     int whileCount = 0;
     Stack<Integer> whileStack = new Stack<>();

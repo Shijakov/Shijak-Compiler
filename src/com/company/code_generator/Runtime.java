@@ -19,11 +19,11 @@ public class Runtime {
 
     public Map<String, Integer> storedRegisters;
 
-    public Map<String, Pair<Integer, SyscallType>> arguments;
-    public Map<String, Pair<Integer, SyscallType>> localVariables;
+    public Map<String, Integer> arguments;
+    public Map<String, Integer> localVariables;
     int stackPointerOffset;
 
-    public Runtime(List<Pair<String, SyscallType>> arguments, List<Pair<String, SyscallType>> localVariables, Coprocessor returnType) {
+    public Runtime(List<String> arguments, List<String> localVariables, Coprocessor returnType) {
         freeFloatRegisters = new Stack<>();
         freeFloatRegisters.push("$f18");
         freeFloatRegisters.push("$f16");
@@ -50,14 +50,14 @@ public class Runtime {
         this.localVariables = new HashMap<>();
         stackPointerOffset = 0;
 
-        for (Pair<String, SyscallType> argument : arguments) {
+        for (String argument : arguments) {
             stackPointerOffset += 4;
-            this.arguments.put(argument.first, new Pair<>(stackPointerOffset, argument.second));
+            this.arguments.put(argument, stackPointerOffset);
         }
 
-        for (Pair<String, SyscallType> localVariable : localVariables) {
+        for (String localVariable : localVariables) {
             stackPointerOffset += 4;
-            this.localVariables.put(localVariable.first, new Pair<>(stackPointerOffset, localVariable.second));
+            this.localVariables.put(localVariable, stackPointerOffset);
         }
 
         stackPointerOffset += 4;
@@ -124,13 +124,12 @@ public class Runtime {
         CommandRunner.runCommand(sb, "addi", List.of("$sp", "$sp", String.valueOf(usedSpace)));
     }
 
-    public Pair<Integer, SyscallType> getVariable(String name) {
-        Pair<Integer, SyscallType> var = localVariables.get(name);
+    public Integer getVariable(String name) {
+        Integer var = localVariables.get(name);
         if (var == null) {
             var = arguments.get(name);
         }
-        int address = stackPointerOffset - var.first;
-        return new Pair<>(address, var.second);
+        return stackPointerOffset - var;
     }
 
     public String getNextFreeInt() {
@@ -169,7 +168,7 @@ public class Runtime {
 
     public void printLocalVariables() {
         for(String variable: localVariables.keySet()) {
-            System.out.printf("%s - %d\n", variable, localVariables.get(variable).first);
+            System.out.printf("%s - %d\n", variable, localVariables.get(variable));
         }
     }
 }

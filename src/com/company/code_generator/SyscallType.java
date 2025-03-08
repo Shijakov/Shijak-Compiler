@@ -4,4 +4,5 @@ public enum SyscallType {
     INTEGER,
     FLOAT,
     CHAR,
+    NONE,
 }

@@ -1,9 +1,8 @@
 package com.company;
 
-//import com.company.code_generator.Generator;
+import com.company.code_generator.Generator;
 import com.company.dev_exceptions.ErrorInGenerationException;
 import com.company.dev_exceptions.ScopeNotFoundException;
-import com.company.exceptions.*;
 import com.company.lexer.Lexer;
 import com.company.lexer.Token;
 import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
@@ -18,18 +17,46 @@ public class Main {
     public static void main(String[] args) throws ErrorInGenerationException, ScopeNotFoundException {
         String program = """
                 define {
-                    3.14 >> PI;
-                    'a' >> A;
-                    6 >> SIX;
-                    true >> TRUE;
+                    23 >> my_age;
+                    'c' >> carcence;
                 }
 
+                fun calc(): void {
+                }
+                                
+                bag a {
+                    name: char[],
+                    age: int
+                }
+                                
                 fun main(): void {
-                    let a: int;
-                    output PI;
-                    output A;
-                    output SIX;
-                    9 >> in * 3 >> eq a;
+                    let dang: bag a[];
+                    let i: int;
+                    alloc bag a[10] >> dang;
+                    fill bag a >> dang[0];
+                                
+                    my_age >> eq dang[0].age;
+                                
+                    alloc char[5] >> dang[0].name;
+                    'F' >> eq dang[0].name[0];
+                    'I' >> eq dang[0].name[1];
+                    'L' >> eq dang[0].name[2];
+                    'I' >> eq dang[0].name[3];
+                    'P' >> eq dang[0].name[4];
+                                
+                    output 'N';
+                    output ' ';
+                                
+                    while (i < 5) {
+                        output dang[0].name[i];
+                        i + 1 >> eq i;
+                    }
+                                
+                    output ' ';
+                    output 'A';
+                    output ' ';
+                                
+                    output dang[0].age;
                 }
                 """;
         try {
@@ -40,13 +67,11 @@ public class Main {
 //            abs.print();
             SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
             SymbolTable symbolTable = semanticAnalyzer.analyze(abs);
-            abs.print();
+//            abs.print();
 
-//            String result = Generator.generate(abs, symbolTable);
-//            System.out.println(result);
-//        } catch (UnexpectedTokenException | UnknownSymbolException | ConstantWithSameNameExistsException | AttemptToChangeConstValueException | VariableNotDeclaredException | VariableAlreadyDeclaredException | FunctionDefinedMultipleTimesException | TypeMismatchException | InHasNoValueException | InvalidTypesForBinaryOperatorException | FunctionDoesntExistException | InvalidArrayCallException | AttemptToFreeAPrimitiveValueException | InvalidReturnTypeException | NotAllPathsHaveAReturnStatementException | BreakNotInLoopException | ContinueNotInLoopException | CannotAssignValueToPointerException e) {
-//            e.printStackTrace(System.err);
-//        }
+            var generator = new Generator(symbolTable);
+            String result = generator.generate(abs);
+            System.out.println(result);
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }

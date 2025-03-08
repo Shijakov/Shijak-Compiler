@@ -307,18 +307,18 @@ public class SemanticAnalyzer {
 
         var bagInfo = symbolTable.bagLookup(((BagType) calledWithType).name);
 
-        var fieldType = bagInfo.getFieldType(node.fieldName);
+        var fieldType = bagInfo.getField(node.fieldName);
 
         if (fieldType == null) {
             throw new FieldDoesntExistOnBagException(bagInfo.bagName, node.fieldName);
         }
 
         if (node.callExtension instanceof ASTNodes.ArrayCallExtension) {
-            return analyzeArrayCallExtension((ASTNodes.ArrayCallExtension) node.callExtension, fieldType);
+            return analyzeArrayCallExtension((ASTNodes.ArrayCallExtension) node.callExtension, fieldType.second);
         } else if (node.callExtension instanceof ASTNodes.BagCallExtension) {
-            return analyzeBagCallExtension((ASTNodes.BagCallExtension) node.callExtension, fieldType);
+            return analyzeBagCallExtension((ASTNodes.BagCallExtension) node.callExtension, fieldType.second);
         } else {
-            return fieldType;
+            return fieldType.second;
         }
     }
 
@@ -430,7 +430,17 @@ public class SemanticAnalyzer {
             paramTypes.add(analyzeExpression(arg.expression, inValue, arg, "expression"));
             arg = (ASTNodes.FunctionCallArgument) arg.next;
         }
-        SymbolTable.FunInfo funInfo = symbolTable.funLookup(node.identifier, paramTypes);
+        SymbolTable.FunInfo funInfo = symbolTable.funLookup(node.identifier);
+
+        if (funInfo.params.size() != paramTypes.size()) {
+            throw new FunctionDoesntExistException(node.identifier, paramTypes);
+        }
+        for (int i = 0; i < funInfo.params.size(); i++) {
+            if (!paramTypes.get(i).equals(funInfo.params.get(i).type)) {
+                throw new FunctionDoesntExistException(node.identifier, paramTypes);
+            }
+        }
+
         return funInfo.returnType;
     }
 

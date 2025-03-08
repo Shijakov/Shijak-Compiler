@@ -26,6 +26,9 @@ public class BagType extends VarType {
         if (object == null || getClass() != object.getClass()) return false;
         if (!super.equals(object)) return false;
         BagType bagType = (BagType) object;
+        if (name.equals("*") || bagType.name.equals("*")) {
+            return true;
+        }
         return Objects.equals(name, bagType.name);
     }
 

@@ -19,8 +19,6 @@ fun main(): void {
 
     23 >> eq dang[0].age;
 
-    69 >> eq max_val;
-
     alloc char[5] >> dang[0].name;
     'F' >> eq dang[0].name[0];
     'I' >> eq dang[0].name[1];
@@ -33,10 +31,12 @@ fun main(): void {
 
     while (i < 5) {
         output dang[0].name[i];
+        i + 1 >> eq i;
     }
 
     output ' ';
     output 'A';
+    output ' ';
 
     output dang[0].age;
 }
