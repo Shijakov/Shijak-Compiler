@@ -1,5 +1,5 @@
 define {
-    1000 >> max_val;
+    23 >> my_age;
     'c' >> carcence;
 }
 
@@ -17,7 +17,7 @@ fun main(): void {
     alloc bag a[10] >> dang;
     fill bag a >> dang[0];
 
-    23 >> eq dang[0].age;
+    my_age >> eq dang[0].age;
 
     alloc char[5] >> dang[0].name;
     'F' >> eq dang[0].name[0];

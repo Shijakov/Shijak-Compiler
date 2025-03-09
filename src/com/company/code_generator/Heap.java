@@ -267,6 +267,7 @@ public class Heap {
     }
 
     public void alloc(StringBuilder sb) {
+
         CommandRunner.runCommand(sb, "jal", List.of("$findFreeSlot"));
     }
 

@@ -152,7 +152,10 @@ public class Generator {
         var memSize = bagInfo.getNumFields() * 4;
 
         CommandRunner.runCommand(sb, "li", List.of(shared.heapMemSizeRequestRegister, Integer.toString(memSize)));
+
+        runtime.saveRegisters(sb);
         heap.alloc(sb);
+        runtime.restoreRegisters(sb);
 
         generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
 
@@ -170,7 +173,10 @@ public class Generator {
 
         CommandRunner.runCommand(sb, "mul", List.of(shared.wordAcc, shared.wordAcc, "4"));
         CommandRunner.runCommand(sb, "mflo", List.of(shared.heapMemSizeRequestRegister));
+
+        runtime.saveRegisters(sb);
         heap.alloc(sb);
+        runtime.restoreRegisters(sb);
 
         CommandRunner.runCommand(sb, "sw", List.of(shared.heapMemReturnRegister, String.format("0(%s)", shared.wordAcc2)));
     }
@@ -179,7 +185,11 @@ public class Generator {
         generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
 
         CommandRunner.runCommand(sb, "lw", List.of(shared.heapMemSizeRequestRegister, String.format("0(%s)", shared.wordAcc2)));
+
+        runtime.saveRegisters(sb);
         heap.free(sb);
+        runtime.restoreRegisters(sb);
+
         CommandRunner.runCommand(sb, "sw", List.of("$zero", String.format("0(%s)", shared.wordAcc2)));
     }
 
