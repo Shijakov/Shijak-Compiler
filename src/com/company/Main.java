@@ -66,24 +66,32 @@ public class Main {
                     output person.age;
                 }
                                 
-                fun getThreeLetterName(char1: char, char2: char, char3: char): char[] {
+                fun getName(len: int): char[] {
                     let name: char[];
-                    alloc char[3] >> name;
-                    char1 >> eq name[0];
-                    char2 >> eq name[1];
-                    char3 >> eq name[2];
-                                
+                    let i: int;
+                    alloc char[len] >> name;
+                    0 >> eq i;
+                    while (i < len) {
+                        input name[i];
+                        i + 1 >> eq i;
+                    }
+                    
                     name >> return;
                 }
                                 
                 fun main (): void {
                     let letters: char[];
-                    getThreeLetterName('M', 'a', 'x') >> eq letters;
+                    let age: int;
+                    input age;
+                    let nameLen: int;
+                    input nameLen;
+                    getName(nameLen) >> eq letters;
                     let name: bag Name;
-                    initializeName(letters, 3) >> eq name;
+                    initializeName(letters, nameLen) >> eq name;
                     
                     let max: bag Person;
-                    initializePerson(name, 23) >> eq max;
+                  
+                    initializePerson(name, age) >> eq max;
                     printPerson(max);
                 }
                 """;

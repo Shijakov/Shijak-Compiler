@@ -62,7 +62,8 @@ public class Lexer {
     public MyMatcher charMatcher = new MyMatcher("char");
     public MyMatcher voidMatcher = new MyMatcher("void");
     public MyMatcher returnMatcher = new MyMatcher("return");
-    public MyMatcher blankMatcher = new MyMatcher("[ \n\t]*");
+    public MyMatcher blankMatcher = new MyMatcher("[ \t]*");
+    public MyMatcher newLineMatcher = new MyMatcher("\n");
     public MyMatcher commentMatcher = new MyMatcher("//.*\n");
     public MyMatcher multiLineCommentMatcher = new MyMatcher("/\\*[^(\\*/)]*\\*/");
 
@@ -77,6 +78,7 @@ public class Lexer {
         matchers.add(multiLineCommentMatcher);
         matchers.add(commentMatcher);
         matchers.add(blankMatcher);
+        matchers.add(newLineMatcher);
         matchers.add(returnMatcher);
         matchers.add(voidMatcher);
         matchers.add(boolMatcher);
@@ -189,6 +191,7 @@ public class Lexer {
     public List<Token> getTokens(String program) throws UnknownSymbolException {
         List<Token> tokenList = new ArrayList<>();
         StringBuilder word = new StringBuilder();
+        var currentLine = 1;
 
         for (int i = 0 ; i < program.length() ; i++) {
             boolean flag = false;
@@ -218,9 +221,12 @@ public class Lexer {
                 }
                 word.setLength(word.length() - maxMatcherCounter);
                 if (!maxMatcher.equals(blankMatcher) &&
+                        !maxMatcher.equals(newLineMatcher) &&
                         !maxMatcher.equals(commentMatcher) &&
                         !maxMatcher.equals(multiLineCommentMatcher)) {
-                    tokenList.add(new Token(matcherTokenMap.get(maxMatcher), word.toString()));
+                    tokenList.add(new Token(matcherTokenMap.get(maxMatcher), word.toString(), currentLine));
+                } else if(maxMatcher.equals(newLineMatcher)) {
+                    currentLine += 1;
                 }
                 word.setLength(0);
                 i -= maxMatcherCounter;

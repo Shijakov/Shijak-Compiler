@@ -147,7 +147,6 @@ public class Generator {
     }
 
     private void generateForFillBagStatement(ASTNodes.FillBag node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, BagDoesntExistException, FunctionDoesntExistException, VariableNotDeclaredException, GeneralDevException, ScopeNotFoundException {
-        CommandRunner.runCommand(sb, "#====================fillBag===================", List.of());
         var bagInfo = symbolTable.bagLookup(node.bagName);
         var memSize = bagInfo.getNumFields() * 4;
 
@@ -160,7 +159,6 @@ public class Generator {
         generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
 
         CommandRunner.runCommand(sb, "sw", List.of(shared.heapMemReturnRegister, String.format("0(%s)", shared.wordAcc)));
-        CommandRunner.runCommand(sb, "#====================end fillBag===================", List.of());
     }
 
     private void generateForAllocStatement(ASTNodes.AllocArr node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, FunctionDoesntExistException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException {
@@ -590,7 +588,6 @@ public class Generator {
     }
 
     private VarType generateForBagCallExtension(ASTNodes.BagCallExtension node, StringBuilder sb, Runtime runtime, VarType calledWithType) throws GeneralDevException, BagDoesntExistException, ErrorInGenerationException, VariableNotDeclaredException, ScopeNotFoundException, FunctionDoesntExistException {
-        CommandRunner.runCommand(sb, "#====================BagCallExtension===================", List.of());
         if (node == null) {
             throw new GeneralDevException("generateForBagCallExtensions called with a null node");
         }
@@ -609,20 +606,27 @@ public class Generator {
         CommandRunner.runCommand(sb, "mflo", List.of(shared.wordAcc2));
 
         CommandRunner.runCommand(sb, "add", List.of(shared.wordAcc, shared.wordAcc, shared.wordAcc2));
-        runtime.accType = Coprocessor.WORD;
-        runtime.accSyscallType = SyscallType.INTEGER;
+
+        if (fieldType.equals(new CharType())) {
+            runtime.accType = Coprocessor.WORD;
+            runtime.accSyscallType = SyscallType.CHAR;
+        } else if (fieldType.equals(new FloatType())) {
+            runtime.accType = Coprocessor.FLOAT;
+            runtime.accSyscallType = SyscallType.FLOAT;
+        } else {
+            runtime.accType = Coprocessor.WORD;
+            runtime.accSyscallType = SyscallType.INTEGER;
+        }
 
         if (node.callExtension instanceof ASTNodes.ArrayCallExtension) {
             return generateForArrCallExtension((ASTNodes.ArrayCallExtension) node.callExtension, sb, runtime, fieldType);
         } else if (node.callExtension instanceof ASTNodes.BagCallExtension){
             return generateForBagCallExtension((ASTNodes.BagCallExtension) node.callExtension, sb, runtime, fieldType);
         }
-        CommandRunner.runCommand(sb, "#====================End BagCallExtension===================", List.of());
         return fieldType;
     }
 
     private VarType generateForArrCallExtension(ASTNodes.ArrayCallExtension node, StringBuilder sb, Runtime runtime, VarType calledWithType) throws ErrorInGenerationException, GeneralDevException, BagDoesntExistException, VariableNotDeclaredException, ScopeNotFoundException, FunctionDoesntExistException {
-        CommandRunner.runCommand(sb, "#====================ArrCallExtension===================", List.of());
         if (node == null) {
             throw new GeneralDevException("generateForArrCallExtension called with a null node");
         }
@@ -643,18 +647,24 @@ public class Generator {
 
         var drilledType = VarType.arrayDrilled(calledWithType);
 
-        runtime.accType = Coprocessor.WORD;
-        runtime.accSyscallType = SyscallType.INTEGER;
+        if (drilledType.equals(new CharType())) {
+            runtime.accType = Coprocessor.WORD;
+            runtime.accSyscallType = SyscallType.CHAR;
+        } else if (drilledType.equals(new FloatType())) {
+            runtime.accType = Coprocessor.FLOAT;
+            runtime.accSyscallType = SyscallType.FLOAT;
+        } else {
+            runtime.accType = Coprocessor.WORD;
+            runtime.accSyscallType = SyscallType.INTEGER;
+        }
 
         if (node.callExtension instanceof ASTNodes.BagCallExtension) {
             return generateForBagCallExtension((ASTNodes.BagCallExtension) node.callExtension, sb, runtime, drilledType);
         }
-        CommandRunner.runCommand(sb, "#====================End ArrCallExtension===================", List.of());
         return drilledType;
     }
 
     private VarType generateForVariable(ASTNodes.Variable node, StringBuilder sb, Runtime runtime) throws VariableNotDeclaredException, ScopeNotFoundException, ErrorInGenerationException, GeneralDevException, BagDoesntExistException, FunctionDoesntExistException {
-        CommandRunner.runCommand(sb, "#====================Variable===================", List.of());
         if (node == null) {
             throw new GeneralDevException("generateForVariable called with a null node");
         }
@@ -671,7 +681,6 @@ public class Generator {
             return generateForBagCallExtension((ASTNodes.BagCallExtension) node.callExtension, sb, runtime, varType);
         }
 
-        CommandRunner.runCommand(sb, "#====================End Variable===================", List.of());
         return varType;
     }
 

@@ -10,7 +10,6 @@ import com.company.parser.abstract_syntax_tree.helpers.PrimitiveToTypeConverter;
 import com.company.parser.abstract_syntax_tree.helpers.TypeToTypeConverter;
 import com.company.symbol_table.SymbolTable;
 import com.company.symbol_table.variable_types.*;
-import com.sun.jdi.DoubleType;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -33,13 +32,6 @@ public class SemanticAnalyzer {
         if (!expected.equals(actual)) {
             throw new TypeMismatchException(expected, actual);
         }
-    }
-
-    private void checkBagIsDefined(VarType type) throws BagDoesntExistException {
-        if (!(type instanceof BagType)) {
-            return;
-        }
-        symbolTable.bagLookup(((BagType) type).name);
     }
 
     private int addScopeAndTimeToNodes(ASTNodes.ASTNode node, int scope, int time) throws ScopeNotFoundException {

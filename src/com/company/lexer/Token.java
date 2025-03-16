@@ -66,10 +66,12 @@ public class Token {
 
     TokenType tokenType;
     String value;
+    public int line;
 
-    public Token(TokenType tokenType, String value) {
+    public Token(TokenType tokenType, String value, int line) {
         this.tokenType = tokenType;
         this.value = value;
+        this.line = line;
     }
 
     public TokenType getTokenType() {
@@ -83,6 +85,7 @@ public class Token {
     @Override
     public String toString() {
         return "Token( " + tokenType +
-                ", " + value + " )";
+                ", " + value +
+                ", " + line + ")";
     }
 }

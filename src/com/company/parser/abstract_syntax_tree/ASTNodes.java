@@ -12,6 +12,7 @@ public class ASTNodes {
         public int scope = -1;
         public ASTNode parent;
         public VarType returnResultType;
+        public int line;
 
         public abstract List<ASTNode> getChildren();
 
@@ -24,7 +25,7 @@ public class ASTNodes {
         }
 
         public void print(int n) {
-            System.out.printf("scope: %d, time %d - ", scope, time);
+            System.out.printf("scope: %d, time %d, line: %d - ", scope, time, line);
             System.out.printf("%d ", n);
             for (int i = 0; i < n; i++) {
                 System.out.print("-");

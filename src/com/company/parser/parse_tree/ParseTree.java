@@ -15,6 +15,7 @@ public class ParseTree {
         public Node firstChild = null;
         public Node neighbor = null;
         public Node parent = null;
+        public int line = -1;
 
         public boolean isTerminal = false;
 
@@ -30,6 +31,11 @@ public class ParseTree {
                 node.parent = this;
             }
         }
+
+        @Override
+        public String toString() {
+            return Integer.toString(line);
+        }
     }
 
     public static class NonTerminalNode extends Node {
@@ -44,7 +50,7 @@ public class ParseTree {
         public String toString() {
             return "NonTerminalNode{" +
                     "nodeType=" + nodeType +
-                    '}';
+                    "} - " + super.toString();
         }
     }
 
@@ -64,7 +70,7 @@ public class ParseTree {
             return "TerminalNode{" +
                     "tokenType=" + tokenType +
                     ", value='" + value + '\'' +
-                    '}';
+                    "} - " + super.toString();
         }
     }
 
@@ -80,6 +86,7 @@ public class ParseTree {
         while (!tokenStack.empty() && !nodeStack.empty()) {
             Node nextNode = nodeStack.peek();
             Token nextToken = tokenStack.peek();
+            nextNode.line = nextToken.line;
 
             if (!nextNode.isTerminal) {
                 Consumer<Stack<Node>> consumer = ll1.table
@@ -105,7 +112,7 @@ public class ParseTree {
 
     private Stack<Token> getTokenStack(List<Token> tokens) {
         Stack<Token> tokenStack = new Stack<>();
-        tokenStack.push(new Token(TokenType.TERMINAL, "$"));
+        tokenStack.push(new Token(TokenType.TERMINAL, "$", -1));
 
         for (int i = tokens.size() - 1; i >= 0 ; i--) {
             tokenStack.push(tokens.get(i));
