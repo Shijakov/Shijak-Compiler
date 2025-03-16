@@ -18,7 +18,7 @@ public class TypeToTypeConverter implements Function<ASTNodes.TypeOrVoid, VarTyp
                     new IntType(intType.hasArrayExtension);
             case ASTNodes.FloatType floatType ->
                     new FloatType(floatType.hasArrayExtension);
-            case ASTNodes.VoidType _ ->
+            case ASTNodes.VoidType voidType ->
                     new VoidType();
             case ASTNodes.BagType bagType ->
                     new BagType(bagType.bagName, bagType.hasArrayExtension);

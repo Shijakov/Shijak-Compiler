@@ -188,10 +188,12 @@ public class Lexer {
         matcherTokenMap.put(openingBracketMatcher, Token.TokenType.OPEN_BRACKET);
     }
 
-    public List<Token> getTokens(String program) throws UnknownSymbolException {
+    public List<Token> getTokens(String prog) throws UnknownSymbolException {
         List<Token> tokenList = new ArrayList<>();
         StringBuilder word = new StringBuilder();
         var currentLine = 1;
+
+        var program = prog + '\n';
 
         for (int i = 0 ; i < program.length() ; i++) {
             boolean flag = false;

@@ -24,12 +24,13 @@ public class ShijakCompiler {
             Files.write(Paths.get("output.mips"), compiledMIPS.getBytes());
         } catch (IOException e) {
             System.err.println("Error reading input file: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
         }
     }
 
-    private static String compile(String code) {
+    private static String compile(String code) throws Exception {
         String result;
-        try {
             Lexer lexer = new Lexer();
             List<Token> tokens = lexer.getTokens(code);
 
@@ -42,9 +43,6 @@ public class ShijakCompiler {
 
             var generator = new Generator(symbolTable);
             result = generator.generate(abs);
-        } catch (Exception e) {
-            result = e.getMessage();
-        }
 
         return result;
     }

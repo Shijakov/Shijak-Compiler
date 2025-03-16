@@ -9,10 +9,10 @@ public class PrimitiveToTypeConverter implements Function<ASTNodes.Constant, Var
     @Override
     public VarType apply(ASTNodes.Constant node) {
         return switch (node) {
-            case ASTNodes.BoolConstant _ -> new BoolType(false);
-            case ASTNodes.CharConstant _ -> new CharType(false);
-            case ASTNodes.IntConstant _ -> new IntType(false);
-            case ASTNodes.FloatConstant _ -> new FloatType(false);
+            case ASTNodes.BoolConstant boolConstant_ -> new BoolType(false);
+            case ASTNodes.CharConstant charConstant -> new CharType(false);
+            case ASTNodes.IntConstant intConstant -> new IntType(false);
+            case ASTNodes.FloatConstant floatConstant -> new FloatType(false);
             default -> null;
         };
     }
