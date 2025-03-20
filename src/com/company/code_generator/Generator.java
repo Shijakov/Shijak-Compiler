@@ -69,20 +69,6 @@ public class Generator {
         sb.append(".data:\n");
         CommandRunner.runCommand(sb, String.format("%s: .word", shared.heapStartLabel), List.of("1"));
         CommandRunner.runCommand(sb, String.format("%s: .word", shared.heapEndLabel), List.of("1"));
-        if (node == null) {
-            return;
-        }
-        generateForDefinitionInstance((ASTNodes.DefinitionInstance) node.firstDefinition, sb);
-    }
-
-    private void generateForDefinitionInstance(ASTNodes.DefinitionInstance node, StringBuilder sb) {
-        if (node == null) {
-            return;
-        }
-        if (node.primitiveConstant instanceof ASTNodes.FloatConstant) {
-            sb.append(node.identifier).append(": .float ").append(((ASTNodes.FloatConstant) node.primitiveConstant).value).append("\n");
-        }
-        generateForDefinitionInstance((ASTNodes.DefinitionInstance) node.nextDefinition, sb);
     }
 
     private void generateForConstructList(ASTNodes.ConstructList node, StringBuilder sb) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
@@ -182,7 +168,7 @@ public class Generator {
     private void generateForFreeStatement(ASTNodes.FreeInstance node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, FunctionDoesntExistException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException {
         generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
 
-        CommandRunner.runCommand(sb, "lw", List.of(shared.heapMemSizeRequestRegister, String.format("0(%s)", shared.wordAcc2)));
+        CommandRunner.runCommand(sb, "lw", List.of(shared.heapMemSizeRequestRegister, String.format("0(%s)", shared.wordAcc)));
 
         runtime.saveRegisters(sb);
         heap.free(sb);

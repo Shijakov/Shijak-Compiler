@@ -1,5 +1,20 @@
+define {
+    3.14 >> PI;
+    'H' >> H;
+    5 >> FIVE;
+}
+
 fun main(): void {
-    let a: float;
-    input a;
-    output a;
+    let arr: float[];
+    alloc float[2] >> arr;
+    PI >> eq arr[0];
+    5.4 >> eq arr[1];
+    output arr[0];
+    output ' ';
+    output arr[1];
+    output ' ';
+    output H;
+    output ' ';
+    output FIVE;
+    free arr;
 }
