@@ -1,3 +1,5 @@
 fun main(): void {
-    output 'H';
+    let a: float;
+    input a;
+    output a;
 }

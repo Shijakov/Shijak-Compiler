@@ -192,16 +192,16 @@ public class Generator {
     }
 
     private void generateForInputStatement(ASTNodes.Input node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
-        generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
-        if (runtime.accSyscallType.equals(SyscallType.FLOAT)) {
+        var varType = generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
+        if (varType.equals(new FloatType())) {
             CommandRunner.runCommand(sb, "li", List.of(shared.syscallRegister, shared.inputFloat));
             CommandRunner.runCommand(sb, "syscall", List.of());
             CommandRunner.runCommand(sb, "s.s", List.of(shared.floatInputResult, String.format("0(%s)", shared.wordAcc)));
-        } else if (runtime.accSyscallType.equals(SyscallType.INTEGER)) {
+        } else if (varType.equals(new IntType())) {
             CommandRunner.runCommand(sb, "li", List.of(shared.syscallRegister, shared.inputInteger));
             CommandRunner.runCommand(sb, "syscall", List.of());
             CommandRunner.runCommand(sb, "sw", List.of(shared.wordInputResult, String.format("0(%s)", shared.wordAcc)));
-        } else if (runtime.accSyscallType.equals(SyscallType.CHAR)) {
+        } else if (varType.equals(new CharType())) {
             CommandRunner.runCommand(sb, "li", List.of(shared.syscallRegister, shared.inputChar));
             CommandRunner.runCommand(sb, "syscall", List.of());
             CommandRunner.runCommand(sb, "sw", List.of(shared.wordInputResult, String.format("0(%s)", shared.wordAcc)));
@@ -300,16 +300,18 @@ public class Generator {
             generateForIn((ASTNodes.InKeyword) node, sb, runtime);
         } else if (node instanceof ASTNodes.Variable) {
             var type = generateForVariable((ASTNodes.Variable) node, sb, runtime);
-            CommandRunner.runCommand(sb, "lw", List.of(shared.wordAcc, String.format("0(%s)", shared.wordAcc)));
             if (type.equals(new FloatType())) {
+                CommandRunner.runCommand(sb, "l.s", List.of(shared.floatAcc, String.format("0(%s)", shared.wordAcc)));
                 runtime.accSyscallType = SyscallType.FLOAT;
                 runtime.accType = Coprocessor.FLOAT;
             }
             else if (type.equals(new CharType())) {
+                CommandRunner.runCommand(sb, "lw", List.of(shared.wordAcc, String.format("0(%s)", shared.wordAcc)));
                 runtime.accSyscallType = SyscallType.CHAR;
                 runtime.accType = Coprocessor.WORD;
             } else {
                 runtime.accSyscallType = SyscallType.INTEGER;
+                CommandRunner.runCommand(sb, "lw", List.of(shared.wordAcc, String.format("0(%s)", shared.wordAcc)));
                 runtime.accType = Coprocessor.WORD;
             }
         } else if (node instanceof ASTNodes.Eq) {
