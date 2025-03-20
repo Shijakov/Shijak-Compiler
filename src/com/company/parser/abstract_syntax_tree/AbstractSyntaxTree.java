@@ -225,6 +225,8 @@ public class AbstractSyntaxTree {
             statement.statement = convertFreeStatement(first);
         } else if (first.nodeType == NodeType.RETURN_STATEMENT) {
             statement.statement = convertReturnStatement(first);
+        } else if (first.nodeType == NodeType.FILL_STATEMENT) {
+            statement.statement = convertFillStatement(first);
         }
 
         statement.nextStatement = convertStatementList(second);
@@ -244,6 +246,20 @@ public class AbstractSyntaxTree {
         defineVar.type = convertType(instantiateType);
 
         return defineVar;
+    }
+
+//    FILL_STATEMENT ::= fill bag identifier >> ASSIGNABLE_INSTANCE ;
+    private static ASTNode convertFillStatement(Node node) {
+        var identifier = node.firstChild.neighbor.neighbor;
+        var assignableInstance = identifier.neighbor.neighbor;
+
+        var fillStatement = new ASTNodes.FillBag();
+        fillStatement.line = identifier.line;
+
+        fillStatement.bagName = ((ParseTree.TerminalNode) identifier).value;
+        fillStatement.assignableInstance = convertAssignableInstance(assignableInstance);
+
+        return fillStatement;
     }
 
 //    ALLOC_ARR ::= alloc PRIMITIVE_TYPE [ MOD_EXPR ] >> ASSIGNABLE_INSTANCE ;

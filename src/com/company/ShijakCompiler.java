@@ -25,7 +25,7 @@ public class ShijakCompiler {
         } catch (IOException e) {
             System.err.println("Error reading input file: " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace(System.err);
+            System.err.println(e.getMessage());
         }
     }
 
