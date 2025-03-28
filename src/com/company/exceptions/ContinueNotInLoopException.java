@@ -1,7 +1,7 @@
 package com.company.exceptions;
 
-public class ContinueNotInLoopException extends Exception {
-    public ContinueNotInLoopException() {
-        super("continue outside of loop");
+public class ContinueNotInLoopException extends LineInfoException {
+    public ContinueNotInLoopException(int line) {
+        super("continue statement outside of loop", line);
     }
 }

@@ -1,7 +1,7 @@
 package com.company.exceptions;
 
-public class VariableAlreadyDeclaredException extends Exception{
-    public VariableAlreadyDeclaredException(String varName) {
-        super(String.format("Multiple declares of variable %s", varName));
+public class VariableAlreadyDeclaredException extends LineInfoException {
+    public VariableAlreadyDeclaredException(String varName, int line) {
+        super("Multiple declares of variable " + varName, line);
     }
 }

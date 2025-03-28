@@ -2,10 +2,6 @@ package com.company.code_generator;
 
 import com.company.dev_exceptions.ErrorInGenerationException;
 import com.company.dev_exceptions.GeneralDevException;
-import com.company.dev_exceptions.ScopeNotFoundException;
-import com.company.exceptions.BagDoesntExistException;
-import com.company.exceptions.FunctionDoesntExistException;
-import com.company.exceptions.VariableNotDeclaredException;
 import com.company.parser.abstract_syntax_tree.ASTNodes;
 import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
 import com.company.symbol_table.SymbolTable;
@@ -28,7 +24,7 @@ public class Generator {
         this.heap = new Heap();
     }
 
-    private void generateForProgram(ASTNodes.Program node, StringBuilder sb) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForProgram(ASTNodes.Program node, StringBuilder sb) throws Exception {
         generateForDefinition((ASTNodes.Definition) node.definition, sb);
         generateForFloatConstants(node, sb);
 
@@ -71,7 +67,7 @@ public class Generator {
         CommandRunner.runCommand(sb, String.format("%s: .word", shared.heapEndLabel), List.of("1"));
     }
 
-    private void generateForConstructList(ASTNodes.ConstructList node, StringBuilder sb) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForConstructList(ASTNodes.ConstructList node, StringBuilder sb) throws Exception {
         if (node == null) {
             return;
         }
@@ -81,7 +77,7 @@ public class Generator {
         generateForConstructList((ASTNodes.ConstructList) node.nextConstruct, sb);
     }
 
-    private void generateForFunction(ASTNodes.FunctionDefinition node, StringBuilder sb) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForFunction(ASTNodes.FunctionDefinition node, StringBuilder sb) throws Exception {
         CommandRunner.runCommand(sb, "#==================================" + node.functionName + "================================", List.of());
         CommandRunner.runCommand(sb, node.functionName + ":", List.of());
 
@@ -100,7 +96,7 @@ public class Generator {
         }
     }
 
-    private void generateForStatement(ASTNodes.Statement node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForStatement(ASTNodes.Statement node, StringBuilder sb, Runtime runtime) throws Exception {
         if (node == null) {
             return;
         }
@@ -132,7 +128,7 @@ public class Generator {
         generateForStatement((ASTNodes.Statement) node.nextStatement, sb, runtime);
     }
 
-    private void generateForFillBagStatement(ASTNodes.FillBag node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, BagDoesntExistException, FunctionDoesntExistException, VariableNotDeclaredException, GeneralDevException, ScopeNotFoundException {
+    private void generateForFillBagStatement(ASTNodes.FillBag node, StringBuilder sb, Runtime runtime) throws Exception {
         var bagInfo = symbolTable.bagLookup(node.bagName);
         var memSize = bagInfo.getNumFields() * 4;
 
@@ -147,7 +143,7 @@ public class Generator {
         CommandRunner.runCommand(sb, "sw", List.of(shared.heapMemReturnRegister, String.format("0(%s)", shared.wordAcc)));
     }
 
-    private void generateForAllocStatement(ASTNodes.AllocArr node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, FunctionDoesntExistException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException {
+    private void generateForAllocStatement(ASTNodes.AllocArr node, StringBuilder sb, Runtime runtime) throws Exception {
         generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
 
         RuntimeHelper.storeAccToTmp(sb, runtime, shared);
@@ -165,7 +161,7 @@ public class Generator {
         CommandRunner.runCommand(sb, "sw", List.of(shared.heapMemReturnRegister, String.format("0(%s)", shared.wordAcc2)));
     }
 
-    private void generateForFreeStatement(ASTNodes.FreeInstance node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, FunctionDoesntExistException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException {
+    private void generateForFreeStatement(ASTNodes.FreeInstance node, StringBuilder sb, Runtime runtime) throws Exception {
         generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
 
         CommandRunner.runCommand(sb, "lw", List.of(shared.heapMemSizeRequestRegister, String.format("0(%s)", shared.wordAcc)));
@@ -174,10 +170,10 @@ public class Generator {
         heap.free(sb);
         runtime.restoreRegisters(sb);
 
-        CommandRunner.runCommand(sb, "sw", List.of("$zero", String.format("0(%s)", shared.wordAcc2)));
+        CommandRunner.runCommand(sb, "sw", List.of("$zero", String.format("0(%s)", shared.wordAcc)));
     }
 
-    private void generateForInputStatement(ASTNodes.Input node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForInputStatement(ASTNodes.Input node, StringBuilder sb, Runtime runtime) throws Exception {
         var varType = generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
         if (varType.equals(new FloatType())) {
             CommandRunner.runCommand(sb, "li", List.of(shared.syscallRegister, shared.inputFloat));
@@ -199,7 +195,7 @@ public class Generator {
         runtime.accSyscallType = null;
     }
 
-    private void generateForOutputStatement(ASTNodes.Output node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForOutputStatement(ASTNodes.Output node, StringBuilder sb, Runtime runtime) throws Exception {
         generateForExpression(node.expression, sb, runtime);
         if (runtime.accSyscallType == SyscallType.INTEGER) {
             CommandRunner.runCommand(sb, "move", List.of(shared.integerToPrint, shared.wordAcc));
@@ -216,7 +212,7 @@ public class Generator {
         CommandRunner.runCommand(sb, "syscall", List.of());
     }
 
-    private void generateForElifStatement(ASTNodes.ASTNode node, StringBuilder sb, Runtime runtime, SharedRuntime shared, Heap heap, int outerIf, int innerIf) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForElifStatement(ASTNodes.ASTNode node, StringBuilder sb, Runtime runtime, SharedRuntime shared, Heap heap, int outerIf, int innerIf) throws Exception {
         CommandRunner.runCommand(sb, String.format("$%delif%d:", outerIf, innerIf), List.of());
         if (node == null) {
             return;
@@ -238,7 +234,7 @@ public class Generator {
 
     }
 
-    private void generateForIfStatement(ASTNodes.If node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForIfStatement(ASTNodes.If node, StringBuilder sb, Runtime runtime) throws Exception {
         int outerIf = shared.ifCount;
         int innerIf = 1;
         shared.ifCount += 1;
@@ -253,7 +249,7 @@ public class Generator {
         CommandRunner.runCommand(sb, String.format("$%dendif:", outerIf), List.of());
     }
 
-    private void generateForWhileStatement(ASTNodes.While node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForWhileStatement(ASTNodes.While node, StringBuilder sb, Runtime runtime) throws Exception {
         shared.pushToWhileStack();
         String whileName = shared.peekLastWhile();
         String endWhileName = shared.peekLastEndWhile();
@@ -266,7 +262,7 @@ public class Generator {
         shared.popWhile();
     }
 
-    private void generateForExpressionList(ASTNodes.ExpressionList node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForExpressionList(ASTNodes.ExpressionList node, StringBuilder sb, Runtime runtime) throws Exception {
         if (node == null) {
             return;
         }
@@ -275,7 +271,7 @@ public class Generator {
         storeAccToIn(sb, runtime);
     }
 
-    private void generateForExpression(ASTNodes.ASTNode node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForExpression(ASTNodes.ASTNode node, StringBuilder sb, Runtime runtime) throws Exception {
         if (node instanceof ASTNodes.BinaryOperator) {
             generateForBinaryOperator((ASTNodes.BinaryOperator) node, sb, runtime);
         } else if (node instanceof ASTNodes.UnaryOperator) {
@@ -311,7 +307,7 @@ public class Generator {
         }
     }
 
-//    private void generateForArrayCall(ASTNodes.ArrayCall node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException {
+//    private void generateForArrayCall(ASTNodes.ArrayCall node, StringBuilder sb, Runtime runtime) throws Exception {
 //        ASTNodes.ArrayCallIdx callIdx = (ASTNodes.ArrayCallIdx) node.callIdx;
 //        generateForExpression(callIdx.expression, sb, runtime);
 //        CommandRunner.runCommand(sb, "mul", List.of(shared.wordAcc, shared.wordAcc, "4"));
@@ -343,7 +339,7 @@ public class Generator {
         CommandRunner.runCommand(sb, "jr", List.of("$ra"));
     }
 
-    private void generateForEqCloser(ASTNodes.Eq node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForEqCloser(ASTNodes.Eq node, StringBuilder sb, Runtime runtime) throws Exception {
         generateForVariable((ASTNodes.Variable) node.assignableInstance, sb, runtime);
 
         if (runtime.accType == Coprocessor.WORD) {
@@ -356,7 +352,7 @@ public class Generator {
         runtime.accSyscallType = null;
     }
 
-    private void generateForBinaryOperator(ASTNodes.BinaryOperator node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForBinaryOperator(ASTNodes.BinaryOperator node, StringBuilder sb, Runtime runtime) throws Exception {
         generateForExpression(node.left, sb, runtime);
         RuntimeHelper.storeAccToTmp(sb, runtime, shared);
         generateForExpression(node.right, sb, runtime);
@@ -480,7 +476,7 @@ public class Generator {
         }
     }
 
-    private void generateForUnaryOperator(ASTNodes.UnaryOperator node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForUnaryOperator(ASTNodes.UnaryOperator node, StringBuilder sb, Runtime runtime) throws Exception {
         if (node.operator.equals("!")) {
             generateForExpression(node.left, sb, runtime);
             CommandRunner.runCommand(sb, "li", List.of(shared.wordAcc2, "0"));
@@ -523,7 +519,7 @@ public class Generator {
         }
     }
 
-    private void generateForFunctionCall(ASTNodes.FunctionCall node, StringBuilder sb, Runtime runtime) throws ErrorInGenerationException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException, ScopeNotFoundException, FunctionDoesntExistException {
+    private void generateForFunctionCall(ASTNodes.FunctionCall node, StringBuilder sb, Runtime runtime) throws Exception {
         var callArg = (ASTNodes.FunctionCallArgument) node.firstArgument;
         int numArgs = 0;
 
@@ -575,7 +571,7 @@ public class Generator {
         }
     }
 
-    private VarType generateForBagCallExtension(ASTNodes.BagCallExtension node, StringBuilder sb, Runtime runtime, VarType calledWithType) throws GeneralDevException, BagDoesntExistException, ErrorInGenerationException, VariableNotDeclaredException, ScopeNotFoundException, FunctionDoesntExistException {
+    private VarType generateForBagCallExtension(ASTNodes.BagCallExtension node, StringBuilder sb, Runtime runtime, VarType calledWithType) throws Exception {
         if (node == null) {
             throw new GeneralDevException("generateForBagCallExtensions called with a null node");
         }
@@ -614,7 +610,7 @@ public class Generator {
         return fieldType;
     }
 
-    private VarType generateForArrCallExtension(ASTNodes.ArrayCallExtension node, StringBuilder sb, Runtime runtime, VarType calledWithType) throws ErrorInGenerationException, GeneralDevException, BagDoesntExistException, VariableNotDeclaredException, ScopeNotFoundException, FunctionDoesntExistException {
+    private VarType generateForArrCallExtension(ASTNodes.ArrayCallExtension node, StringBuilder sb, Runtime runtime, VarType calledWithType) throws Exception {
         if (node == null) {
             throw new GeneralDevException("generateForArrCallExtension called with a null node");
         }
@@ -652,7 +648,7 @@ public class Generator {
         return drilledType;
     }
 
-    private VarType generateForVariable(ASTNodes.Variable node, StringBuilder sb, Runtime runtime) throws VariableNotDeclaredException, ScopeNotFoundException, ErrorInGenerationException, GeneralDevException, BagDoesntExistException, FunctionDoesntExistException {
+    private VarType generateForVariable(ASTNodes.Variable node, StringBuilder sb, Runtime runtime) throws Exception {
         if (node == null) {
             throw new GeneralDevException("generateForVariable called with a null node");
         }
@@ -773,7 +769,7 @@ public class Generator {
         }
     }
 
-    private void createActivationRecords() throws ScopeNotFoundException {
+    private void createActivationRecords() throws Exception {
         for(SymbolTable.FunInfo funInfo : symbolTable.root.funRow.values()) {
             List<String> arguments = new ArrayList<>();
             List<String> localVariables = new ArrayList<>();
@@ -789,7 +785,7 @@ public class Generator {
         }
     }
 
-    public String generate(AbstractSyntaxTree tree) throws ErrorInGenerationException, ScopeNotFoundException, FunctionDoesntExistException, VariableNotDeclaredException, GeneralDevException, BagDoesntExistException {
+    public String generate(AbstractSyntaxTree tree) throws Exception {
         StringBuilder result = new StringBuilder();
         createActivationRecords();
         generateForProgram((ASTNodes.Program) tree.root, result);

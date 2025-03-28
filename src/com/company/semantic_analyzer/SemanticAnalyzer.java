@@ -1,7 +1,7 @@
 package com.company.semantic_analyzer;
 
 import com.company.dev_exceptions.GeneralDevException;
-import com.company.dev_exceptions.ScopeNotFoundException;
+import com.company.exceptions.symbol_table.*;
 import com.company.exceptions.*;
 import com.company.model.Pair;
 import com.company.parser.abstract_syntax_tree.ASTNodes;
@@ -28,12 +28,6 @@ public class SemanticAnalyzer {
         typeToTypeConverter = new TypeToTypeConverter();
     }
 
-    private void assertTypesEqual(VarType expected, VarType actual) throws TypeMismatchException {
-        if (!expected.equals(actual)) {
-            throw new TypeMismatchException(expected, actual);
-        }
-    }
-
     private int addScopeAndTimeToNodes(ASTNodes.ASTNode node, int scope, int time) throws ScopeNotFoundException {
         int currScope = scope;
         int nextTime = time + 1;
@@ -52,30 +46,43 @@ public class SemanticAnalyzer {
         return nextTime;
     }
 
-    private void defineConstants(ASTNodes.Definition node) throws ConstantWithSameNameExistsException {
+    private void defineConstants(ASTNodes.Definition node) throws ConstantDefinedMultipleTimesException {
         if (node == null) {
             return;
         }
         ASTNodes.DefinitionInstance instance = (ASTNodes.DefinitionInstance) node.firstDefinition;
         while (instance != null) {
             VarType type = primitiveToTypeConverter.apply((ASTNodes.Constant) instance.primitiveConstant);
-            symbolTable.defineConstant(instance.identifier, type, ((ASTNodes.Constant) instance.primitiveConstant).value);
+            try {
+                symbolTable.defineConstant(instance.identifier, type, ((ASTNodes.Constant) instance.primitiveConstant).value);
+            } catch (ConstantAlreadyDefinedException e) {
+                throw new ConstantDefinedMultipleTimesException(instance.identifier, instance.line);
+            }
             instance = (ASTNodes.DefinitionInstance) instance.nextDefinition;
         }
     }
 
-    private void defineFunction(ASTNodes.FunctionDefinition node) throws FunctionDefinedMultipleTimesException, ConstantWithSameNameExistsException, VariableAlreadyDeclaredException, ScopeNotFoundException {
+    private void defineFunction(ASTNodes.FunctionDefinition node) throws VariableDefinedMultipleTimesException, ScopeNotFoundException, FunctionDefinedMultipleTimesException {
         ASTNodes.FunctionParam param = (ASTNodes.FunctionParam) node.paramList;
         List<SymbolTable.FunParam> params = new ArrayList<>();
         while (param != null) {
             VarType type = typeToTypeConverter.apply((ASTNodes.Type) param.type);
             params.add(new SymbolTable.FunParam(param.identifier, type));
-            symbolTable.declareVar(node.scope, param.identifier, type, node.time, true);
+            try {
+                symbolTable.declareVar(node.scope, param.identifier, type, node.time, true);
+            } catch (VariableAlreadyDefinedException|ConstantAlreadyDefinedException e) {
+                throw new VariableDefinedMultipleTimesException(param.identifier, param.line);
+            }
             param = (ASTNodes.FunctionParam) param.nextParam;
         }
         VarType returnType = typeToTypeConverter.apply((ASTNodes.TypeOrVoid) node.returnType);
         node.returnResultType = returnType;
-        symbolTable.defineFunction(node.functionName, params, returnType, node.scope);
+        try {
+            symbolTable.defineFunction(node.functionName, params, returnType, node.scope);
+        } catch (FunctionAlreadyDefinedException e) {
+            throw new FunctionDefinedMultipleTimesException(node.functionName, node.line);
+        }
+
     }
 
     private void defineBag(ASTNodes.BagDefinition node) throws BagDefinedMultipleTimesException {
@@ -87,10 +94,14 @@ public class SemanticAnalyzer {
             param = (ASTNodes.BagParam) param.nextParam;
         }
 
-        symbolTable.defineBag(node.bagName, params);
+        try {
+            symbolTable.defineBag(node.bagName, params);
+        } catch (BagAlreadyDefinedException e) {
+            throw new BagDefinedMultipleTimesException(node.bagName, node.line);
+        }
     }
 
-    private void defineConstructs(ASTNodes.ConstructList node) throws FunctionDefinedMultipleTimesException, ConstantWithSameNameExistsException, VariableAlreadyDeclaredException, ScopeNotFoundException, BagDefinedMultipleTimesException {
+    private void defineConstructs(ASTNodes.ConstructList node) throws FunctionDefinedMultipleTimesException, ScopeNotFoundException, BagDefinedMultipleTimesException, VariableDefinedMultipleTimesException {
         if (node == null) {
             return;
         }
@@ -151,13 +162,17 @@ public class SemanticAnalyzer {
 
     private void analyzeWhileStatement(ASTNodes.While node) throws Exception {
         VarType type = analyzeExpression(node.condition, null, node, "condition");
-        assertTypesEqual(new BoolType(false), type);
+        if (!type.equals(new BoolType())) {
+            throw new TypeMismatchException(new BoolType(), type, node.condition.line);
+        }
         analyzeStatement((ASTNodes.Statement) node.firstStatement);
     }
 
     private void analyzeIfStatement(ASTNodes.If node) throws Exception {
         VarType type = analyzeExpression(node.condition, null, node, "condition");
-        assertTypesEqual(new BoolType(false), type);
+        if (!type.equals(new BoolType())) {
+            throw new TypeMismatchException(new BoolType(), type, node.condition.line);
+        }
         analyzeStatement((ASTNodes.Statement) node.firstStatement);
         analyzeElse(node.elif);
     }
@@ -168,7 +183,9 @@ public class SemanticAnalyzer {
         }
         if (node instanceof ASTNodes.Elif) {
             VarType type = analyzeExpression(((ASTNodes.Elif) node).condition, null, node, "condition");
-            assertTypesEqual(new BoolType(false), type);
+            if (!type.equals(new BoolType())) {
+                throw new TypeMismatchException(new BoolType(), type, ((ASTNodes.Elif) node).condition.line);
+            }
             analyzeStatement((ASTNodes.Statement) ((ASTNodes.Elif) node).firstStatement);
             analyzeElse(((ASTNodes.Elif) node).elif);
         } else {
@@ -193,9 +210,13 @@ public class SemanticAnalyzer {
         }
     }
 
-    private void analyzeDefineVar(ASTNodes.DefineVar node) throws ConstantWithSameNameExistsException, VariableAlreadyDeclaredException, ScopeNotFoundException {
+    private void analyzeDefineVar(ASTNodes.DefineVar node) throws ScopeNotFoundException, VariableDefinedMultipleTimesException {
         VarType type = typeToTypeConverter.apply((ASTNodes.Type) node.type);
-        symbolTable.declareVar(node.scope, node.identifier, type, node.time, false);
+        try {
+            symbolTable.declareVar(node.scope, node.identifier, type, node.time, false);
+        } catch (VariableAlreadyDefinedException|ConstantAlreadyDefinedException e) {
+            throw new VariableDefinedMultipleTimesException(node.identifier, node.line);
+        }
     }
 
     private void analyzeAllocArrStatement(ASTNodes.AllocArr node) throws Exception {
@@ -203,17 +224,17 @@ public class SemanticAnalyzer {
 
         var expressionType = analyzeExpression(node.expression, null, node, "expression");
         if (!expressionType.equals(new IntType())) {
-            throw new TypeMismatchException(new IntType(), expressionType);
+            throw new TypeMismatchException(new IntType(), expressionType, node.expression.line);
         }
 
         var varRez = analyzeVariable((ASTNodes.Variable) node.assignableInstance);
         if (varRez.first instanceof SymbolTable.ConstInfo) {
-            throw new AttemptToChangeConstValueException(varRez.first.name);
+            throw new AttemptToChangeConstValueException(varRez.first.name, node.assignableInstance.line);
         }
         var expectedType = VarType.withArrayExt(type);
 
         if (!expectedType.equals(varRez.second)) {
-            throw new TypeMismatchException(expectedType, varRez.second);
+            throw new TypeMismatchException(expectedType, varRez.second, node.assignableInstance.line);
         }
 
     }
@@ -222,13 +243,13 @@ public class SemanticAnalyzer {
 
         var varRez = analyzeVariable((ASTNodes.Variable) node.assignableInstance);
         if (varRez.first instanceof SymbolTable.ConstInfo) {
-            throw new AttemptToChangeConstValueException(varRez.first.name);
+            throw new AttemptToChangeConstValueException(varRez.first.name, node.assignableInstance.line);
         }
 
         var varType = varRez.second;
 
         if (!varType.hasArrExt & !(varType instanceof BagType)) {
-            throw new AttemptToFreeAPrimitiveValueException(varType);
+            throw new AttemptToFreeAPrimitiveValueException(varType, node.assignableInstance.line);
         }
     }
 
@@ -237,7 +258,7 @@ public class SemanticAnalyzer {
 
         if (varOrConstInfo instanceof SymbolTable.ConstInfo) {
             if (node.callExtension != null) {
-                throw new AttemptedToDrillConstantException(varOrConstInfo.name);
+                throw new AttemptedToDrillConstantException(varOrConstInfo.name, node.line);
             }
 
             ASTNodes.Constant newNode = null;
@@ -273,13 +294,13 @@ public class SemanticAnalyzer {
             throw new GeneralDevException("Invalid call with calledWithType=null of analyzeArrayCallExtension");
         }
         if (!calledWithType.hasArrExt) {
-            throw new AttemptedToDrillUndrillableTypeException(calledWithType);
+            throw new AttemptedToDrillUndrillableTypeException(calledWithType, node.line);
         }
 
         var drilledType = VarType.arrayDrilled(calledWithType);
         var expressionType = analyzeExpression(node.expression, null, node, "expression");
         if (!expressionType.equals(new IntType())) {
-            throw new TypeMismatchException(new IntType(), expressionType);
+            throw new TypeMismatchException(new IntType(), expressionType, node.expression.line);
         }
 
         if (node.callExtension != null) {
@@ -294,7 +315,7 @@ public class SemanticAnalyzer {
         }
 
         if (!(calledWithType instanceof BagType) || calledWithType.hasArrExt) {
-            throw new AttemptedToDrillUndrillableTypeException(calledWithType);
+            throw new AttemptedToDrillUndrillableTypeException(calledWithType, node.line);
         }
 
         var bagInfo = symbolTable.bagLookup(((BagType) calledWithType).name);
@@ -302,7 +323,7 @@ public class SemanticAnalyzer {
         var fieldType = bagInfo.getField(node.fieldName);
 
         if (fieldType == null) {
-            throw new FieldDoesntExistOnBagException(bagInfo.bagName, node.fieldName);
+            throw new FieldDoesntExistOnBagException(bagInfo.bagName, node.fieldName, node.line);
         }
 
         if (node.callExtension instanceof ASTNodes.ArrayCallExtension) {
@@ -318,18 +339,18 @@ public class SemanticAnalyzer {
         var varRez = analyzeVariable((ASTNodes.Variable) node.assignableInstance);
 
         if (varRez.first instanceof SymbolTable.ConstInfo) {
-            throw new AttemptToChangeConstValueException(varRez.first.name);
+            throw new AttemptToChangeConstValueException(varRez.first.name, node.assignableInstance.line);
         }
 
         if (!VarType.isPrimitive(varRez.second)) {
-            throw new AttemptedToInputNonPrimitiveType(varRez.second);
+            throw new AttemptedToInputNonPrimitiveType(varRez.second, node.assignableInstance.line);
         }
     }
 
     private void analyzeOutputStatement(ASTNodes.Output node) throws Exception {
         var expressionType = analyzeExpression(node.expression, null, node, "expression");
         if (!VarType.isPrimitive(expressionType)) {
-            throw new AttemptedToOutputNonPrimitiveType(expressionType);
+            throw new AttemptedToOutputNonPrimitiveType(expressionType, node.expression.line);
         }
     }
 
@@ -345,7 +366,7 @@ public class SemanticAnalyzer {
         VarType functionReturnType = symbolTable.getFunctionReturnType(((ASTNodes.FunctionDefinition) function).functionName);
 
         if (!functionReturnType.equals(type)) {
-            throw new InvalidReturnTypeException(functionReturnType, type);
+            throw new InvalidReturnTypeException(functionReturnType, type, node.line);
         }
     }
 
@@ -355,10 +376,10 @@ public class SemanticAnalyzer {
          var varType = varRez.second;
 
          if (variable instanceof SymbolTable.ConstInfo) {
-             throw new AttemptToChangeConstValueException(variable.name);
+             throw new AttemptToChangeConstValueException(variable.name, node.assignableInstance.line);
          }
          if (!varType.equals(type)) {
-             throw new TypeMismatchException(type, varType);
+             throw new TypeMismatchException(type, varType, node.assignableInstance.line);
          }
     }
 
@@ -409,7 +430,7 @@ public class SemanticAnalyzer {
             return primitiveToTypeConverter.apply((ASTNodes.Constant) node);
         } else {
             if (inValue == null) {
-                throw new InHasNoValueException();
+                throw new InHasNoValueException(node.line);
             }
             return inValue;
         }
@@ -425,11 +446,11 @@ public class SemanticAnalyzer {
         SymbolTable.FunInfo funInfo = symbolTable.funLookup(node.identifier);
 
         if (funInfo.params.size() != paramTypes.size()) {
-            throw new FunctionDoesntExistException(node.identifier, paramTypes);
+            throw new FunctionDoesntExistException(node.identifier, paramTypes, node.line);
         }
         for (int i = 0; i < funInfo.params.size(); i++) {
             if (!paramTypes.get(i).equals(funInfo.params.get(i).type)) {
-                throw new FunctionDoesntExistException(node.identifier, paramTypes);
+                throw new FunctionDoesntExistException(node.identifier, paramTypes, node.line);
             }
         }
 
@@ -439,7 +460,7 @@ public class SemanticAnalyzer {
     private VarType analyzeUnaryOperator(ASTNodes.UnaryOperator node, VarType inValue) throws Exception {
         VarType type = analyzeExpression(node.left, inValue, node, "left");
         if (!type.equals(new BoolType())) {
-            throw new TypeMismatchException(new BoolType(), type);
+            throw new TypeMismatchException(new BoolType(), type, node.line);
         }
         return type;
     }
@@ -479,7 +500,7 @@ public class SemanticAnalyzer {
                 return new BoolType();
             }
         }
-        throw new InvalidTypesForBinaryOperatorException(node.operator, left, right);
+        throw new InvalidTypesForBinaryOperatorException(node.operator, left, right, node.line);
     }
 
     private void createFunctionTree(ASTNodes.ASTNode node, FunctionNode curr) {
@@ -539,10 +560,10 @@ public class SemanticAnalyzer {
             nowInWhile = true;
         }
         if (node instanceof ASTNodes.Break && !inWhile) {
-            throw new BreakNotInLoopException();
+            throw new BreakNotInLoopException(node.line);
         }
         if (node instanceof ASTNodes.Continue && !inWhile) {
-            throw new ContinueNotInLoopException();
+            throw new ContinueNotInLoopException(node.line);
         }
 
         for (ASTNodes.ASTNode child : node.getChildren()) {
@@ -559,7 +580,7 @@ public class SemanticAnalyzer {
                 FunctionNode functionNode = new FunctionNode();
                 createFunctionTree(curr.construct, functionNode);
                 if (!checkFunctionTree(functionNode)) {
-                    throw new NotAllPathsHaveAReturnStatementException(((ASTNodes.FunctionDefinition) curr.construct).functionName);
+                    throw new NotAllPathsHaveAReturnStatementException(((ASTNodes.FunctionDefinition) curr.construct).functionName, curr.construct.line);
                 }
             }
             curr = (ASTNodes.ConstructList) curr.nextConstruct;

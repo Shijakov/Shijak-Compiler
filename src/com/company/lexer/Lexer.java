@@ -219,7 +219,7 @@ public class Lexer {
             }
             if (!flag) {
                 if (maxMatcher == null) {
-                    throw new UnknownSymbolException(word.toString());
+                    throw new UnknownSymbolException(word.toString(), currentLine);
                 }
                 word.setLength(word.length() - maxMatcherCounter);
                 if (!maxMatcher.equals(blankMatcher) &&

@@ -93,14 +93,14 @@ public class ParseTree {
                         .get(new LL1Table.Pair(((NonTerminalNode)nextNode).nodeType, nextToken.getTokenType()));
 
                 if (consumer == null) {
-                    throw new UnexpectedTokenException(nextToken, (NonTerminalNode)nextNode);
+                    throw new UnexpectedTokenException(nextToken, (NonTerminalNode)nextNode, nextToken.line);
                 }
 
                 consumer.accept(nodeStack);
             } else {
                 TerminalNode terminalNode = (TerminalNode) nextNode;
                 if (!terminalNode.tokenType.equals(nextToken.getTokenType())) {
-                    throw new UnexpectedTokenException(nextToken, terminalNode);
+                    throw new UnexpectedTokenException(nextToken, terminalNode, nextToken.line);
                 }
 
                 terminalNode.value = nextToken.getValue();

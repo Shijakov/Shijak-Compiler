@@ -1,7 +1,7 @@
 package com.company.exceptions;
 
-public class CannotAssignValueToPointerException extends Exception {
-    public CannotAssignValueToPointerException(String identifier) {
-        super(String.format("Cannot assign value to pointer %s", identifier));
+public class CannotAssignValueToPointerException extends LineInfoException {
+    public CannotAssignValueToPointerException(String identifier, int line) {
+        super("Cannot assign value to pointer " + identifier, line);
     }
 }

@@ -1,7 +1,7 @@
 package com.company.exceptions;
 
-public class ConstantWithSameNameExistsException extends Exception{
-    public ConstantWithSameNameExistsException(String varName) {
-        super(String.format("Constant with same name \"%s\" defined", varName));
+public class ConstantWithSameNameExistsException extends LineInfoException{
+    public ConstantWithSameNameExistsException(String varName, int line) {
+        super("Constant with same name \"" + varName + "\" defined", line);
     }
 }

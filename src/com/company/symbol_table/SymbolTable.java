@@ -1,8 +1,7 @@
 package com.company.symbol_table;
 
 import com.company.dev_exceptions.GeneralDevException;
-import com.company.dev_exceptions.ScopeNotFoundException;
-import com.company.exceptions.*;
+import com.company.exceptions.symbol_table.*;
 import com.company.model.Pair;
 import com.company.symbol_table.variable_types.VarType;
 
@@ -185,45 +184,44 @@ public class SymbolTable {
     }
 
     public void defineFunction(String funName, List<FunParam> params, VarType returnType, int scopeId)
-            throws FunctionDefinedMultipleTimesException {
+            throws FunctionAlreadyDefinedException {
         if (root.funRow.containsKey(funName)) {
-            throw new FunctionDefinedMultipleTimesException(funName);
+            throw new FunctionAlreadyDefinedException(funName);
         }
         FunInfo funInfo = new FunInfo(funName, params, returnType, scopeId);
         root.defineFunction(funName, funInfo);
     }
 
-    public void defineBag(String bagName, List<BagParam> params) throws BagDefinedMultipleTimesException {
+    public void defineBag(String bagName, List<BagParam> params) throws BagAlreadyDefinedException {
         if (root.bagRow.containsKey(bagName)) {
-            throw new BagDefinedMultipleTimesException(bagName);
+            throw new BagAlreadyDefinedException(bagName);
         }
         BagInfo bagInfo = new BagInfo(bagName, params);
         root.defineBag(bagName, bagInfo);
     }
 
-    public void defineConstant(String constName, VarType type, String value)
-            throws ConstantWithSameNameExistsException {
+    public void defineConstant(String constName, VarType type, String value) throws ConstantAlreadyDefinedException {
         if (root.constRow.containsKey(constName)) {
-            throw new ConstantWithSameNameExistsException(constName);
+            throw new ConstantAlreadyDefinedException(constName);
         }
         ConstInfo constInfo = new ConstInfo(constName, type, value);
         root.defineConstant(constName, constInfo);
     }
 
     public void declareVar(int scopeId, String varName, VarType type, int timeDeclared, boolean isArgument)
-            throws VariableAlreadyDeclaredException, ScopeNotFoundException, ConstantWithSameNameExistsException {
+            throws VariableAlreadyDefinedException, ScopeNotFoundException, ConstantAlreadyDefinedException {
         Table table = (Table) findScope(scopeId);
         if (table.row.containsKey(varName)) {
-            throw new VariableAlreadyDeclaredException(varName);
+            throw new VariableAlreadyDefinedException(varName);
         }
         if (root.constRow.containsKey(varName)) {
-            throw new ConstantWithSameNameExistsException(varName);
+            throw new ConstantAlreadyDefinedException(varName);
         }
         VarInfo varInfo = new VarInfo(varName, type, true, timeDeclared, isArgument);
         table.declareVar(varName, varInfo);
     }
 
-    public VarOrConstInfo varLookup(int scopeId, String varName, int time) throws ScopeNotFoundException, VariableNotDeclaredException {
+    public VarOrConstInfo varLookup(int scopeId, String varName, int time) throws ScopeNotFoundException, VariableNotFoundException {
         GeneralTable generalTable = findScope(scopeId);
         while (!(generalTable instanceof GlobalTable)) {
             VarInfo varInfo = ((Table) generalTable).row.get(varName);
@@ -234,31 +232,31 @@ public class SymbolTable {
         }
         ConstInfo result = constLookup(varName);
         if (result == null) {
-            throw new VariableNotDeclaredException(varName);
+            throw new VariableNotFoundException(varName);
         }
         return result;
     }
 
-    public ConstInfo constLookup(String constName) throws VariableNotDeclaredException {
+    public ConstInfo constLookup(String constName) throws VariableNotFoundException {
         var constant = root.constRow.get(constName);
         if (constant == null) {
-            throw new VariableNotDeclaredException(constName);
+            throw new VariableNotFoundException(constName);
         }
         return constant;
     }
 
-    public FunInfo funLookup(String funName) throws FunctionDoesntExistException {
+    public FunInfo funLookup(String funName) throws FunctionNotFoundException {
         FunInfo fun = root.funRow.get(funName);
         if (fun == null) {
-            throw new FunctionDoesntExistException(funName, List.of());
+            throw new FunctionNotFoundException(funName);
         }
         return fun;
     }
 
-    public BagInfo bagLookup(String bagName) throws BagDoesntExistException {
+    public BagInfo bagLookup(String bagName) throws BagNotFoundException {
         BagInfo bag = root.bagRow.get(bagName);
         if (bag == null) {
-            throw new BagDoesntExistException(bagName);
+            throw new BagNotFoundException(bagName);
         }
 
         return bag;

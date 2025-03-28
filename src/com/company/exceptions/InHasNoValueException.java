@@ -1,7 +1,7 @@
 package com.company.exceptions;
 
-public class InHasNoValueException extends Exception{
-    public InHasNoValueException() {
-        super("In has no value");
+public class InHasNoValueException extends LineInfoException {
+    public InHasNoValueException(int line) {
+        super("In has no value", line);
     }
 }
