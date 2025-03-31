@@ -1,6 +1,6 @@
 package com.company.semantic_analyzer;
 
-import com.company.dev_exceptions.GeneralDevException;
+import com.company.exceptions.dev_exceptions.GeneralDevException;
 import com.company.exceptions.symbol_table.*;
 import com.company.exceptions.*;
 import com.company.model.Pair;
@@ -487,12 +487,16 @@ public class SemanticAnalyzer {
             }
         } else if (comparatorSign.matches()) {
             if (left.equals(new IntType()) && right.equals(new IntType())) {
-                return new BoolType(false);
+                return new BoolType();
             } else if (left.equals(new IntType()) && right.equals(new FloatType())) {
-                return new BoolType(false);
+                return new BoolType();
             } else if (left.equals(new FloatType()) && right.equals(new IntType())) {
                 return new BoolType();
             } else if (left.equals(new FloatType()) && right.equals(new FloatType())) {
+                return new BoolType();
+            } if (left.equals(new BoolType()) && right.equals(new BoolType())) {
+                return new BoolType();
+            } if (left.equals(new CharType()) && right.equals(new CharType())) {
                 return new BoolType();
             }
         } else {
@@ -587,11 +591,38 @@ public class SemanticAnalyzer {
         }
     }
 
+    private boolean checkMainFunctionIsDefinedRec(ASTNodes.ASTNode node) {
+        if (node == null) {
+            return false;
+        }
 
+        if (node instanceof ASTNodes.FunctionDefinition && ((ASTNodes.FunctionDefinition) node).functionName.equals("main")) {
+            return true;
+        }
+
+        if (node instanceof ASTNodes.FunctionDefinition || node instanceof ASTNodes.BagDefinition) {
+            return false;
+        }
+
+        boolean isDefined = false;
+
+        for(ASTNodes.ASTNode child : node.getChildren()) {
+            isDefined = checkMainFunctionIsDefinedRec(child) || isDefined;
+        }
+
+        return isDefined;
+    }
+
+    private void checkMainFunctionIsDefined(ASTNodes.ASTNode node) throws MainFunctionNotDeclaredException {
+        if (!checkMainFunctionIsDefinedRec(node)) {
+            throw new MainFunctionNotDeclaredException();
+        }
+    }
 
     public SymbolTable analyze(AbstractSyntaxTree tree) throws Exception {
         addScopeAndTimeToNodes(tree.root, 0, 0);
         analyzeProgram((ASTNodes.Program) tree.root);
+        checkMainFunctionIsDefined(tree.root);
         checkAllFunctionsReturn((ASTNodes.Program) tree.root);
         checkBreakContinueInWhile(tree.root, false);
         return symbolTable;

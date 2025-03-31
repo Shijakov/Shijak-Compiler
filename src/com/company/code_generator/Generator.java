@@ -1,7 +1,7 @@
 package com.company.code_generator;
 
-import com.company.dev_exceptions.ErrorInGenerationException;
-import com.company.dev_exceptions.GeneralDevException;
+import com.company.exceptions.dev_exceptions.ErrorInGenerationException;
+import com.company.exceptions.dev_exceptions.GeneralDevException;
 import com.company.parser.abstract_syntax_tree.ASTNodes;
 import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
 import com.company.symbol_table.SymbolTable;

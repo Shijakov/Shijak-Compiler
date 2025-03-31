@@ -1,4 +1,4 @@
-package com.company.dev_exceptions;
+package com.company.exceptions.dev_exceptions;
 
 public class GeneralDevException extends Exception {
     public GeneralDevException(String message) {

@@ -1,12 +1,13 @@
 package com.company;
 
 import com.company.code_generator.Generator;
-import com.company.dev_exceptions.ErrorInGenerationException;
+import com.company.exceptions.dev_exceptions.ErrorInGenerationException;
 import com.company.exceptions.symbol_table.ScopeNotFoundException;
 import com.company.lexer.Lexer;
 import com.company.lexer.Token;
 import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
 import com.company.parser.parse_tree.ParseTree;
+import com.company.parser.parse_tree.SyntaxAnalyzer;
 import com.company.semantic_analyzer.SemanticAnalyzer;
 import com.company.symbol_table.SymbolTable;
 
@@ -50,7 +51,7 @@ public class ShijakCompiler {
         Lexer lexer = new Lexer();
         List<Token> tokens = lexer.getTokens(code);
 
-        ParseTree parseTree = new ParseTree(tokens);
+        ParseTree parseTree = SyntaxAnalyzer.analyze(tokens);
 
         AbstractSyntaxTree abs = AbstractSyntaxTree.from(parseTree);
 

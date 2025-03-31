@@ -1,6 +1,6 @@
 package com.company.symbol_table;
 
-import com.company.dev_exceptions.GeneralDevException;
+import com.company.exceptions.dev_exceptions.GeneralDevException;
 import com.company.exceptions.symbol_table.*;
 import com.company.model.Pair;
 import com.company.symbol_table.variable_types.VarType;

@@ -1,6 +1,6 @@
 package com.company.code_generator;
 
-import com.company.dev_exceptions.ErrorInGenerationException;
+import com.company.exceptions.dev_exceptions.ErrorInGenerationException;
 
 import java.util.List;
 

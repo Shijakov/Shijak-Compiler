@@ -1,8 +1,7 @@
 package com.company.symbol_table.variable_types;
 
-import com.company.dev_exceptions.GeneralDevException;
+import com.company.exceptions.dev_exceptions.GeneralDevException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 public abstract class VarType {
