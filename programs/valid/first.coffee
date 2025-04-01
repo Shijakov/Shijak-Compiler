@@ -1,25 +1,23 @@
 define {
-    23 >> my_age;
-    'c' >> carcence;
+    24 >> MY_AGE;
+    5 >> NAME_LEN;
 }
 
-fun calc(): void {
-}
-
-bag a {
+bag Person {
     name: char[],
     age: int
 }
 
 fun main(): void {
-    let dang: bag a[];
+    let dang: bag Person[];
     let i: int;
-    alloc bag a[10] >> dang;
-    fill bag a >> dang[0];
+    alloc bag Person[10] >> dang;
+    fill bag Person >> dang[0];
 
-    my_age >> eq dang[0].age;
+    MY_AGE >> eq dang[0].age;
 
-    alloc char[5] >> dang[0].name;
+    alloc char[NAME_LEN] >> dang[0].name;
+
     'F' >> eq dang[0].name[0];
     'I' >> eq dang[0].name[1];
     'L' >> eq dang[0].name[2];
@@ -29,7 +27,7 @@ fun main(): void {
     output 'N';
     output ' ';
 
-    while (i < 5) {
+    while (i < NAME_LEN) {
         output dang[0].name[i];
         i + 1 >> eq i;
     }

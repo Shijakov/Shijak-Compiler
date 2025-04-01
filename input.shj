@@ -1,5 +1,19 @@
-bag Person {
-    name: char[],
-    age: int,
-    neighbor: Person
+fun fibonacci(num: int): int {
+  if (num == 0) {
+    0 >> return;
+  }
+  if (num == 1) {
+    1 >> return;
+  }
+  fibonacci(num - 1) >>
+    in + fibonacci(num - 2) >>
+    return;
+}
+
+fun main(): void {
+  let result: int;
+  let idx: int;
+  input idx;
+  fibonacci(idx) >> eq result;
+  output result;
 }

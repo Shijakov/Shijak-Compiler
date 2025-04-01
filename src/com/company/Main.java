@@ -20,39 +20,31 @@ import java.util.Stack;
 public class Main {
 
     public static void main(String[] args) throws ErrorInGenerationException, ScopeNotFoundException {
-//        try {
-//            String inputCode = new String(Files.readAllBytes(Paths.get("input.shj")));
-//            String inputForProgram = new String(Files.readAllBytes(Paths.get("input.txt")));
-//            Scanner scanner = new Scanner(inputForProgram);
-//
-//            Lexer lexer = new Lexer();
-//            List<Token> tokens = lexer.getTokens(inputCode);
-//
-//            ParseTree parseTree = SyntaxAnalyzer.analyze(tokens);
-//
-//            parseTree.print();
-//
-//            AbstractSyntaxTree abs = AbstractSyntaxTree.from(parseTree);
-//
-//            abs.print();
-//
-//            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
-//            SymbolTable symbolTable = semanticAnalyzer.analyze(abs);
-//
-//            var generator = new Generator(symbolTable);
-//            String result = generator.generate(abs);
-//
-//            System.out.println(result);
-//        }  catch (Exception e) {
-//            e.printStackTrace(System.err);
-//        }
-        var stack = new Stack<String>();
-        stack.push("1");
-        stack.push("2");
-        stack.push("3");
-        stack.push("4");
-        for (String element : stack) {
-            System.out.println(element);
+        try {
+            String inputCode = new String(Files.readAllBytes(Paths.get("input.shj")));
+            String inputForProgram = new String(Files.readAllBytes(Paths.get("input.txt")));
+            Scanner scanner = new Scanner(inputForProgram);
+
+            Lexer lexer = new Lexer();
+            List<Token> tokens = lexer.getTokens(inputCode);
+
+            ParseTree parseTree = SyntaxAnalyzer.analyze(tokens);
+
+            parseTree.print();
+
+            AbstractSyntaxTree abs = AbstractSyntaxTree.from(parseTree);
+
+            abs.print();
+
+            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+            SymbolTable symbolTable = semanticAnalyzer.analyze(abs);
+
+            var generator = new Generator(symbolTable);
+            String result = generator.generate(abs);
+
+            System.out.println(result);
+        }  catch (Exception e) {
+            e.printStackTrace(System.err);
         }
     }
 }
