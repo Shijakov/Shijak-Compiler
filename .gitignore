@@ -1,3 +1,9 @@
 out/
 .idea/
+programs/
 test.coffee
+input.shj
+input.txt
+output.mips
+shijak.iml
+Shijak-Compiler.iml
