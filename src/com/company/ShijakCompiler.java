@@ -1,15 +1,15 @@
 package com.company;
 
-import com.company.code_generator.Generator;
-import com.company.exceptions.dev_exceptions.ErrorInGenerationException;
-import com.company.exceptions.symbol_table.ScopeNotFoundException;
-import com.company.lexer.Lexer;
-import com.company.lexer.Token;
-import com.company.parser.abstract_syntax_tree.AbstractSyntaxTree;
-import com.company.parser.parse_tree.ParseTree;
-import com.company.parser.parse_tree.SyntaxAnalyzer;
-import com.company.semantic_analyzer.SemanticAnalyzer;
-import com.company.symbol_table.SymbolTable;
+import com.company.old.code_generator.Generator;
+import com.company.old.exceptions.dev_exceptions.ErrorInGenerationException;
+import com.company.old.exceptions.symbol_table.ScopeNotFoundException;
+import com.company.old.lexer.Lexer;
+import com.company.old.lexer.Token;
+import com.company.old.parser.abstract_syntax_tree.AbstractSyntaxTree;
+import com.company.old.parser.parse_tree.ParseTree;
+import com.company.old.parser.parse_tree.SyntaxAnalyzer;
+import com.company.old.semantic_analyzer.SemanticAnalyzer;
+import com.company.old.symbol_table.SymbolTable;
 
 import java.io.File;
 import java.io.IOException;
