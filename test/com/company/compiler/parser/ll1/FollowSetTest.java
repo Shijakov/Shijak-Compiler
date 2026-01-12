@@ -15,13 +15,13 @@ import static com.company.compiler.helpers.Helpers.*;
 public class FollowSetTest {
     @Test
     public void testSingleNonTerminal() {
-        var S = new StartSymbol();
+        var S = nonTerminal("S");
         var A = nonTerminal("A");
         var a = terminal("a");
         var b = terminal("b");
         var c = terminal("c");
 
-        var grammar = GrammarBuilder.grammar()
+        var grammar = GrammarBuilder.grammar(S)
                 .withAdded(rule(S, List.of(a, A, b)))
                 .withAdded(rule(A, List.of(c)))
                 .build();
@@ -43,11 +43,11 @@ public class FollowSetTest {
 
     @Test
     public void testEmptyProduction() {
-        var S = new StartSymbol();
+        var S = nonTerminal("S");
         var A = nonTerminal("A");
         var b = terminal("b");
 
-        var grammar = GrammarBuilder.grammar()
+        var grammar = GrammarBuilder.grammar(S)
                 .withAdded(rule(S, List.of(A, b)))
                 .withAdded(rule(A, List.of(new EmptySymbol())))
                 .build();
@@ -69,12 +69,12 @@ public class FollowSetTest {
 
     @Test
     public void testNonTerminalAtEnd() {
-        var S = new StartSymbol();
+        var S = nonTerminal("S");
         var A = nonTerminal("A");
         var a = terminal("a");
         var b = terminal("b");
 
-        var grammar = GrammarBuilder.grammar()
+        var grammar = GrammarBuilder.grammar(S)
                 .withAdded(rule(S, List.of(a, A)))
                 .withAdded(rule(A, List.of(b)))
                 .build();
@@ -96,7 +96,7 @@ public class FollowSetTest {
 
     @Test
     public void testMultipleOccurrences() {
-        var S = new StartSymbol();
+        var S = nonTerminal("S");
         var A = nonTerminal("A");
         var B = nonTerminal("B");
         var C = nonTerminal("C");
@@ -104,7 +104,7 @@ public class FollowSetTest {
         var b = terminal("b");
         var c = terminal("c");
 
-        var grammar = GrammarBuilder.grammar()
+        var grammar = GrammarBuilder.grammar(S)
                 .withAdded(rule(S, List.of(A, B, C)))
                 .withAdded(rule(A, List.of(a)))
                 .withAdded(rule(B, List.of(b)))
@@ -138,14 +138,14 @@ public class FollowSetTest {
 
     @Test
     public void testEmptyInMiddle() {
-        var S = new StartSymbol();
+        var S = nonTerminal("S");
         var A = nonTerminal("A");
         var B = nonTerminal("B");
         var C = nonTerminal("C");
         var a = terminal("a");
         var c = terminal("c");
 
-        var grammar = GrammarBuilder.grammar()
+        var grammar = GrammarBuilder.grammar(S)
                 .withAdded(rule(S, List.of(A, B, C)))
                 .withAdded(rule(A, List.of(a)))
                 .withAdded(rule(B, List.of(new EmptySymbol())))
@@ -179,12 +179,12 @@ public class FollowSetTest {
 
     @Test
     public void testRecursiveProduction() {
-        var S = new StartSymbol();
+        var S = nonTerminal("S");
         var A = nonTerminal("A");
         var B = nonTerminal("B");
         var a = terminal("a");
 
-        var grammar = GrammarBuilder.grammar()
+        var grammar = GrammarBuilder.grammar(S)
                 .withAdded(rule(S, List.of(A)))
                 .withAdded(rule(A, List.of(B)))
                 .withAdded(rule(B, List.of(new EmptySymbol())))
@@ -213,13 +213,13 @@ public class FollowSetTest {
 
     @Test
     public void testMutualRecursion() {
-        var S = new StartSymbol();
+        var S = nonTerminal("S");
         var A = nonTerminal("A");
         var B = nonTerminal("B");
         var a = terminal("a");
         var b = terminal("b");
 
-        var grammar = GrammarBuilder.grammar()
+        var grammar = GrammarBuilder.grammar(S)
                 .withAdded(rule(S, List.of(A, B)))
                 .withAdded(rule(A, List.of(B, a)))
                 .withAdded(rule(A, List.of(new EmptySymbol())))
@@ -248,11 +248,11 @@ public class FollowSetTest {
 
     @Test
     public void testStartSymbolOnly() {
-        var S = new StartSymbol();
+        var A = nonTerminal("A");
         var a = terminal("a");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(a)))
+        var grammar = GrammarBuilder.grammar(A)
+                .withAdded(rule(A, List.of(a)))
                 .build();
 
         var followSet = FollowSet.from(grammar, FirstSet.from(grammar));
@@ -261,13 +261,12 @@ public class FollowSetTest {
 
         assertEquals(
                 Set.of(new TerminalToken()),
-                followSet.getFor(S)
+                followSet.getFor(A)
         );
     }
 
     @Test
     public void testClassicExpressionGrammar() {
-        var S = new StartSymbol();
         var E = nonTerminal("E");
         var Ep = nonTerminal("Ep");
         var T = nonTerminal("T");
@@ -279,8 +278,7 @@ public class FollowSetTest {
         var close = terminal(")");
         var id = terminal("id");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(E)))
+        var grammar = GrammarBuilder.grammar(E)
                 .withAdded(rule(E, List.of(T, Ep)))
                 .withAdded(rule(Ep, List.of(plus, T, Ep)))
                 .withAdded(rule(Ep, List.of(new EmptySymbol())))
@@ -293,12 +291,7 @@ public class FollowSetTest {
 
         var followSet = FollowSet.from(grammar, FirstSet.from(grammar));
 
-        assertEquals(6, followSet.size());
-
-        assertEquals(
-                Set.of(new TerminalToken()),
-                followSet.getFor(S)
-        );
+        assertEquals(5, followSet.size());
 
         assertEquals(
                 Set.of(new TerminalToken(), close),

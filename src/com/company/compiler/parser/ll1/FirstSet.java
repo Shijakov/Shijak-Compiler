@@ -1,5 +1,6 @@
 package com.company.compiler.parser.ll1;
 
+import com.company.compiler.common.exceptions.DevException;
 import com.company.compiler.common.grammar.Grammar;
 import com.company.compiler.common.grammar.Rule;
 import com.company.compiler.common.symbol.EmptySymbol;
@@ -15,13 +16,19 @@ import java.util.Set;
 
 public class FirstSet {
     Map<NonTerminal, Set<Terminal>> entries;
+    Map<Rule, Set<Terminal>> ruleEntries;
 
     private FirstSet() {
         this.entries = new HashMap<>();
+        this.ruleEntries = new HashMap<>();
     }
 
     private void setFor(NonTerminal nonTerminal, Set<Terminal> terminals) {
         this.entries.put(nonTerminal, terminals);
+    }
+
+    private void setFor(Rule rule, Set<Terminal> terminals) {
+        this.ruleEntries.put(rule, terminals);
     }
 
     public boolean hasFor(Symbol symbol) {
@@ -32,6 +39,13 @@ public class FirstSet {
     public Set<Terminal> getFor(Symbol symbol) {
         if (symbol instanceof Terminal) return new HashSet<>(Set.of((Terminal) symbol));
         return new HashSet<>(this.entries.get((NonTerminal) symbol));
+    }
+
+    public Set<Terminal> getFor(Rule rule) {
+        if (!this.ruleEntries.containsKey(rule)) {
+            throw new DevException("FirstSet doesn't have rule key");
+        }
+        return new HashSet<>(this.ruleEntries.get(rule));
     }
 
     public boolean containsFor(Symbol symbol, Terminal terminal) {
@@ -68,6 +82,7 @@ public class FirstSet {
             }
         }
 
+        firstSet.setFor(rule, nonTerminalFirstSet);
         return nonTerminalFirstSet;
     }
 
@@ -75,11 +90,11 @@ public class FirstSet {
         if (symbol instanceof Terminal) {
             return Set.of((Terminal) symbol);
         }
-        if (firstSet.hasFor((NonTerminal) symbol)) {
-            return firstSet.getFor((NonTerminal) symbol);
+        if (firstSet.hasFor(symbol)) {
+            return firstSet.getFor(symbol);
         }
 
-        if (visited.contains(symbol)) {
+        if (visited.contains((NonTerminal) symbol)) {
             throw new GrammarIsLeftRecursive();
         }
         visited.add((NonTerminal) symbol);

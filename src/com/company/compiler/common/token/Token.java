@@ -10,9 +10,4 @@ public class Token extends Terminal {
     public String getRegex() {
         return this.name;
     }
-
-    @Override
-    protected String className() {
-        return Token.class.getName();
-    }
 }

@@ -30,6 +30,9 @@ public class FollowSet {
     }
 
     public Set<Terminal> getFor(NonTerminal nonTerminal) {
+        if (!this.entries.containsKey(nonTerminal)) {
+            throw new DevException("Tried to access not set key in follow set");
+        }
         return new HashSet<>(this.entries.get(nonTerminal));
     }
 
@@ -68,7 +71,6 @@ public class FollowSet {
         computeUnions(grammar.getRules(), firstSet, unions);
 
         var followSet = new FollowSet();
-        followSet.setFor(new StartSymbol(), Set.of(new TerminalToken()));
 
         while(!unions.isEmpty()) {
             var changeOccurred = false;

@@ -9,4 +9,9 @@ public class Terminal extends Symbol {
     public String toString() {
         return "Terminal(" + name + ")";
     }
+
+    @Override
+    protected String className() {
+        return Terminal.class.getName();
+    }
 }

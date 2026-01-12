@@ -3,6 +3,7 @@ package com.company.compiler.helpers;
 import com.company.compiler.common.grammar.Rule;
 import com.company.compiler.common.helpers.Pair;
 import com.company.compiler.common.symbol.NonTerminal;
+import com.company.compiler.common.symbol.StartSymbol;
 import com.company.compiler.common.symbol.Symbol;
 import com.company.compiler.common.symbol.Terminal;
 import com.company.compiler.common.token.Token;

@@ -3,6 +3,7 @@ package com.company.compiler.parser.ll1;
 import com.company.compiler.common.grammar.GrammarBuilder;
 import com.company.compiler.common.symbol.EmptySymbol;
 import com.company.compiler.common.symbol.StartSymbol;
+import com.company.compiler.common.token.TerminalToken;
 import com.company.compiler.parser.ll1.exceptions.GrammarIsLeftRecursive;
 import org.junit.jupiter.api.Test;
 
@@ -19,8 +20,7 @@ public class FirstSetTest {
         var A = nonTerminal("A");
         var a = terminal("a");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(a)))
                 .build();
 
@@ -37,6 +37,16 @@ public class FirstSetTest {
                 Set.of(a),
                 firstSet.getFor(A)
         );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(A, List.of(a)))
+        );
     }
 
     @Test
@@ -45,8 +55,7 @@ public class FirstSetTest {
         var A = nonTerminal("A");
         var e = new EmptySymbol();
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(e)))
                 .build();
 
@@ -55,13 +64,23 @@ public class FirstSetTest {
         assertEquals(2, firstSet.size());
 
         assertEquals(
-                Set.of(e),
+                Set.of(new TerminalToken()),
                 firstSet.getFor(S)
         );
 
         assertEquals(
                 Set.of(e),
                 firstSet.getFor(A)
+        );
+
+        assertEquals(
+                Set.of(new TerminalToken()),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(e),
+                firstSet.getFor(rule(A, List.of(e)))
         );
     }
 
@@ -73,8 +92,7 @@ public class FirstSetTest {
         var b = terminal("b");
         var c = terminal("c");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(a)))
                 .withAdded(rule(A, List.of(b)))
                 .withAdded(rule(A, List.of(c)))
@@ -93,6 +111,26 @@ public class FirstSetTest {
                 Set.of(a, b, c),
                 firstSet.getFor(A)
         );
+
+        assertEquals(
+                Set.of(a, b, c),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(A, List.of(a)))
+        );
+
+        assertEquals(
+                Set.of(b),
+                firstSet.getFor(rule(A, List.of(b)))
+        );
+
+        assertEquals(
+                Set.of(c),
+                firstSet.getFor(rule(A, List.of(c)))
+        );
     }
 
     @Test
@@ -102,8 +140,7 @@ public class FirstSetTest {
         var B = nonTerminal("B");
         var a = terminal("a");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(B)))
                 .withAdded(rule(B, List.of(a)))
                 .build();
@@ -126,6 +163,21 @@ public class FirstSetTest {
                 Set.of(a),
                 firstSet.getFor(B)
         );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(A, List.of(B)))
+        );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(B, List.of(a)))
+        );
     }
 
     @Test
@@ -136,8 +188,7 @@ public class FirstSetTest {
         var C = nonTerminal("C");
         var a = terminal("a");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(B, C)))
                 .withAdded(rule(B, List.of(new EmptySymbol())))
                 .withAdded(rule(C, List.of(a)))
@@ -166,6 +217,26 @@ public class FirstSetTest {
                 Set.of(a),
                 firstSet.getFor(C)
         );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(A, List.of(B, C)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(B, List.of(new EmptySymbol())))
+        );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(C, List.of(a)))
+        );
     }
 
     @Test
@@ -175,8 +246,7 @@ public class FirstSetTest {
         var B = nonTerminal("B");
         var C = nonTerminal("C");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(B, C)))
                 .withAdded(rule(B, List.of(new EmptySymbol())))
                 .withAdded(rule(C, List.of(new EmptySymbol())))
@@ -186,8 +256,8 @@ public class FirstSetTest {
 
         assertEquals(4, firstSet.size());
 
-        assertEquals(
-                Set.of(new EmptySymbol()),
+         assertEquals(
+                Set.of(new TerminalToken()),
                 firstSet.getFor(S)
         );
 
@@ -205,6 +275,26 @@ public class FirstSetTest {
                 Set.of(new EmptySymbol()),
                 firstSet.getFor(C)
         );
+
+        assertEquals(
+                Set.of(new TerminalToken()),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(A, List.of(B, C)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(B, List.of(new EmptySymbol())))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(C, List.of(new EmptySymbol())))
+        );
     }
 
     @Test
@@ -214,8 +304,7 @@ public class FirstSetTest {
         var B = nonTerminal("B");
         var c = terminal("c");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(B)))
                 .withAdded(rule(A, List.of(c)))
                 .withAdded(rule(B, List.of(new EmptySymbol())))
@@ -226,7 +315,7 @@ public class FirstSetTest {
         assertEquals(3, firstSet.size());
 
         assertEquals(
-                Set.of(new EmptySymbol(), c),
+                Set.of(new TerminalToken(), c),
                 firstSet.getFor(S)
         );
 
@@ -239,6 +328,26 @@ public class FirstSetTest {
                 Set.of(new EmptySymbol()),
                 firstSet.getFor(B)
         );
+
+        assertEquals(
+                Set.of(new TerminalToken(), c),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(A, List.of(B)))
+        );
+
+        assertEquals(
+                Set.of(c),
+                firstSet.getFor(rule(A, List.of(c)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(B, List.of(new EmptySymbol())))
+        );
     }
 
     @Test
@@ -250,8 +359,7 @@ public class FirstSetTest {
         var D = nonTerminal("D");
         var d = terminal("d");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(B, C, D)))
                 .withAdded(rule(B, List.of(new EmptySymbol())))
                 .withAdded(rule(C, List.of(new EmptySymbol())))
@@ -286,6 +394,31 @@ public class FirstSetTest {
                 Set.of(d),
                 firstSet.getFor(D)
         );
+
+        assertEquals(
+                Set.of(d),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(d),
+                firstSet.getFor(rule(A, List.of(B, C, D)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(B, List.of(new EmptySymbol())))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(C, List.of(new EmptySymbol())))
+        );
+
+        assertEquals(
+                Set.of(d),
+                firstSet.getFor(rule(D, List.of(d)))
+        );
     }
 
     @Test
@@ -297,8 +430,7 @@ public class FirstSetTest {
         var b = terminal("b");
         var c = terminal("c");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(B, C)))
                 .withAdded(rule(B, List.of(b)))
                 .withAdded(rule(B, List.of(new EmptySymbol())))
@@ -328,17 +460,40 @@ public class FirstSetTest {
                 Set.of(c),
                 firstSet.getFor(C)
         );
+
+        assertEquals(
+                Set.of(b, c),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(b, c),
+                firstSet.getFor(rule(A, List.of(B, C)))
+        );
+
+        assertEquals(
+                Set.of(b),
+                firstSet.getFor(rule(B, List.of(b)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(B, List.of(new EmptySymbol())))
+        );
+
+        assertEquals(
+                Set.of(c),
+                firstSet.getFor(rule(C, List.of(c)))
+        );
     }
 
     @Test
     public void testRecursiveGrammar() {
-        var S = new StartSymbol();
         var A = nonTerminal("A");
         var B = nonTerminal("B");
         var a = terminal("a");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(B)))
                 .withAdded(rule(B, List.of(A)))
                 .withAdded(rule(B, List.of(a)))
@@ -349,13 +504,11 @@ public class FirstSetTest {
 
     @Test
     public void testLeftRecursiveGrammar() {
-        var S = new StartSymbol();
         var A = nonTerminal("A");
         var a = terminal("a");
         var b = terminal("b");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(A, a)))
                 .withAdded(rule(A, List.of(b)))
                 .build();
@@ -371,8 +524,7 @@ public class FirstSetTest {
         var C = nonTerminal("C");
         var a = terminal("a");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(A)))
+        var grammar = GrammarBuilder.grammar(A)
                 .withAdded(rule(A, List.of(B)))
                 .withAdded(rule(B, List.of(C)))
                 .withAdded(rule(C, List.of(new EmptySymbol())))
@@ -384,7 +536,7 @@ public class FirstSetTest {
         assertEquals(4, firstSet.size());
 
         assertEquals(
-                Set.of(new EmptySymbol(), a),
+                Set.of(new TerminalToken(), a),
                 firstSet.getFor(S)
         );
 
@@ -402,6 +554,31 @@ public class FirstSetTest {
                 Set.of(new EmptySymbol(), a),
                 firstSet.getFor(C)
         );
+
+        assertEquals(
+                Set.of(new TerminalToken(), a),
+                firstSet.getFor(rule(S, List.of(A, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol(), a),
+                firstSet.getFor(rule(A, List.of(B)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol(), a),
+                firstSet.getFor(rule(B, List.of(C)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(C, List.of(new EmptySymbol())))
+        );
+
+        assertEquals(
+                Set.of(a),
+                firstSet.getFor(rule(C, List.of(a)))
+        );
     }
 
     @Test
@@ -418,8 +595,7 @@ public class FirstSetTest {
         var closed = terminal(")");
         var id = terminal("id");
 
-        var grammar = GrammarBuilder.grammar()
-                .withAdded(rule(S, List.of(E)))
+        var grammar = GrammarBuilder.grammar(E)
                 .withAdded(rule(E, List.of(T, Ep)))
                 .withAdded(rule(Ep, List.of(plus, T, Ep)))
                 .withAdded(rule(Ep, List.of(new EmptySymbol())))
@@ -462,6 +638,51 @@ public class FirstSetTest {
         assertEquals(
                 Set.of(open, id),
                 firstSet.getFor(F)
+        );
+
+        assertEquals(
+                Set.of(open, id),
+                firstSet.getFor(rule(S, List.of(E, new TerminalToken())))
+        );
+
+        assertEquals(
+                Set.of(open, id),
+                firstSet.getFor(rule(E, List.of(T, Ep)))
+        );
+
+        assertEquals(
+                Set.of(plus),
+                firstSet.getFor(rule(Ep, List.of(plus, T, Ep)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(Ep, List.of(new EmptySymbol())))
+        );
+
+        assertEquals(
+                Set.of(open, id),
+                firstSet.getFor(rule(T, List.of(F, Tp)))
+        );
+
+        assertEquals(
+                Set.of(times),
+                firstSet.getFor(rule(Tp, List.of(times, F, Tp)))
+        );
+
+        assertEquals(
+                Set.of(new EmptySymbol()),
+                firstSet.getFor(rule(Tp, List.of(new EmptySymbol())))
+        );
+
+        assertEquals(
+                Set.of(open),
+                firstSet.getFor(rule(F, List.of(open, E, closed)))
+        );
+
+        assertEquals(
+                Set.of(id),
+                firstSet.getFor(rule(F, List.of(id)))
         );
     }
 }
