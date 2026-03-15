@@ -1,11 +1,11 @@
 package com.company.compiler.parser.ll1;
 
-import com.company.compiler.common.exceptions.DevException;
 import com.company.compiler.common.grammar.Grammar;
 import com.company.compiler.common.grammar.Rule;
 import com.company.compiler.common.symbol.EmptySymbol;
 import com.company.compiler.common.symbol.NonTerminal;
 import com.company.compiler.common.symbol.Terminal;
+import com.company.compiler.parser.exceptions.NoEntryInTableException;
 import com.company.compiler.parser.ll1.exceptions.TableEntryAlreadyHasAValue;
 
 import java.util.HashMap;
@@ -28,9 +28,9 @@ public class LL1Table {
         table = new HashMap<>();
     }
 
-    public Rule getRule(NonTerminal nonTerminal, Terminal terminal) {
+    public Rule getRule(NonTerminal nonTerminal, Terminal terminal) throws NoEntryInTableException {
         if (!table.containsKey(new Key(nonTerminal, terminal))) {
-            throw new DevException("No rule for table entry");
+            throw new NoEntryInTableException();
         }
         return table.get(new Key(nonTerminal, terminal));
     }
@@ -54,7 +54,10 @@ public class LL1Table {
         }
     }
 
-    public static LL1Table from(Grammar grammar, FirstSet firstSet, FollowSet followSet) {
+    public static LL1Table from(Grammar grammar) {
+        var firstSet = FirstSet.from(grammar);
+        var followSet = FollowSet.from(grammar, firstSet);
+
         var table = new LL1Table();
         for (var rule : grammar.getRules()) {
             var firstSetOfRule = firstSet.getFor(rule);

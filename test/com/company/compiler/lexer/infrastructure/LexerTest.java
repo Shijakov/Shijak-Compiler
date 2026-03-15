@@ -1,7 +1,7 @@
 package com.company.compiler.lexer.infrastructure;
 
 import com.company.compiler.common.token.TerminalToken;
-import com.company.compiler.lexer.exceptions.SyntaxError;
+import com.company.compiler.lexer.exceptions.TokenNotRecognizedException;
 import com.company.compiler.lexer.model.LexerToken;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +52,7 @@ class LexerTest {
         var program = "hi tom nice to meet you";
         var lexer = getLexer();
 
-        assertThrows(SyntaxError.class, () -> lexer.analyze(program, tokens));
+        assertThrows(TokenNotRecognizedException.class, () -> lexer.analyze(program, tokens));
     }
 
     @Test

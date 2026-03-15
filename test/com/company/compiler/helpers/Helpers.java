@@ -7,6 +7,7 @@ import com.company.compiler.common.symbol.StartSymbol;
 import com.company.compiler.common.symbol.Symbol;
 import com.company.compiler.common.symbol.Terminal;
 import com.company.compiler.common.token.Token;
+import com.company.compiler.common.tree.Node;
 import com.company.compiler.lexer.model.LexerToken;
 
 import java.util.List;
@@ -26,5 +27,9 @@ public class Helpers {
 
     public static Rule rule(NonTerminal nonTerminal, List<Symbol> right) {
         return new Rule(nonTerminal, right);
+    }
+
+    public static <T> Node<T> node(T value) {
+        return new Node<>(value);
     }
 }

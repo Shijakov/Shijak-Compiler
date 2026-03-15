@@ -4,6 +4,7 @@ import com.company.compiler.common.grammar.GrammarBuilder;
 import com.company.compiler.common.symbol.EmptySymbol;
 import com.company.compiler.common.symbol.StartSymbol;
 import com.company.compiler.common.token.TerminalToken;
+import com.company.compiler.parser.exceptions.NoEntryInTableException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import static com.company.compiler.helpers.Helpers.*;
 
 public class LL1TableTest {
     @Test
-    public void testClassicExpressionGrammar() {
+    public void testClassicExpressionGrammar() throws NoEntryInTableException {
         var S = new StartSymbol();
         var E = nonTerminal("E");
         var Ep = nonTerminal("Ep");
@@ -38,11 +39,7 @@ public class LL1TableTest {
                 .withAdded(rule(F, List.of(id)))
                 .build();
 
-        var firstSet = FirstSet.from(grammar);
-
-        var followSet = FollowSet.from(grammar, firstSet);
-
-        var table = LL1Table.from(grammar, firstSet, followSet);
+        var table = LL1Table.from(grammar);
 
         assertEquals(15, table.size());
 

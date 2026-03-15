@@ -3,7 +3,7 @@ package com.company.compiler.lexer.infrastructure;
 import com.company.compiler.common.exceptions.DevException;
 import com.company.compiler.common.token.RecognisedToken;
 import com.company.compiler.common.token.TerminalToken;
-import com.company.compiler.lexer.exceptions.SyntaxError;
+import com.company.compiler.lexer.exceptions.TokenNotRecognizedException;
 import com.company.compiler.lexer.model.LexerToken;
 import com.company.compiler.lexer.model.MatchedResult;
 import com.company.compiler.lexer.model.TokenMatcher;
@@ -92,7 +92,7 @@ public class LongestTokenLexer implements Lexer {
             var result = getMaxTokenMatched(word, tokenMatchers);
 
             if (result == null) {
-                throw new SyntaxError(word, line);
+                throw new TokenNotRecognizedException(word, line);
             }
 
             if (!result.getToken().shouldIgnore()) {
