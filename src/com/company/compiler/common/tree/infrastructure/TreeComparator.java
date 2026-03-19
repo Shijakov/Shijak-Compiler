@@ -1,15 +1,15 @@
 package com.company.compiler.common.tree.infrastructure;
 
-import com.company.compiler.common.tree.Node;
-import com.company.compiler.common.tree.Tree;
+import com.company.compiler.common.tree.model.Node;
+import com.company.compiler.common.tree.model.Tree;
 
 public class TreeComparator {
 
-    public static <T> boolean areEqual(Tree<T> t1, Tree<T> t2) {
+    public static <T> boolean areEqual(Tree t1, Tree t2) {
         return areEqual(t1.getRoot(), t2.getRoot());
     }
 
-    private static <T> boolean areEqual(Node<T> n1, Node<T> n2) {
+    private static <T> boolean areEqual(Node n1, Node n2) {
         if (n1 == null && n2 == null)
             return true;
         if (n1 == null || n2 == null)

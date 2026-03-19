@@ -1,27 +1,34 @@
-package com.company.compiler.common.tree;
+package com.company.compiler.parser.model;
+
+import com.company.compiler.common.symbol.Symbol;
+import com.company.compiler.common.tree.model.Node;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Node <T> {
-    protected Node<T> firstChild;
-    protected Node<T> parent;
-    protected Node<T> neighbor;
+public class ParseNode implements Node {
+    public ParseNode firstChild;
+    public ParseNode parent;
+    public ParseNode neighbor;
 
-    protected T value;
+    protected Symbol value;
 
-    public Node(T value) {
+    public int line;
+
+    public ParseNode(Symbol value) {
         this.value = value;
     }
 
-    public void attachChildren(List<Node<T>> children) {
+    public void attachChildren(List<? extends Node> children) {
         if (children.isEmpty()) return;
 
-        Node<T> prev = null;
-        this.firstChild = children.getFirst();
+        ParseNode prev = null;
+        this.firstChild = (ParseNode) children.getFirst();
 
-        for (Node<T> child : children) {
+        for (Node node : children) {
+            ParseNode child = (ParseNode) node;
+
             child.parent = this;
             if (prev != null)
                 prev.neighbor = child;
@@ -30,8 +37,8 @@ public class Node <T> {
         }
     }
 
-    public List<Node<T>> getChildren() {
-        var result = new ArrayList<Node<T>>();
+    public List<ParseNode> getChildren() {
+        var result = new ArrayList<ParseNode>();
         var curr = this.firstChild;
 
         while (curr != null) {
@@ -42,7 +49,7 @@ public class Node <T> {
         return result;
     }
 
-    public T getValue() {
+    public Symbol getValue() {
         return value;
     }
 
@@ -56,7 +63,7 @@ public class Node <T> {
     @Override
     public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass()) return false;
-        Node<?> node = (Node<?>) object;
+        ParseNode node = (ParseNode) object;
         return Objects.equals(value, node.value);
     }
 

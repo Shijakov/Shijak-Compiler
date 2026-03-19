@@ -1,10 +1,11 @@
 package com.company.compiler.lexer.infrastructure;
 
 import com.company.compiler.common.exceptions.DevException;
+import com.company.compiler.common.token.IgnoredToken;
 import com.company.compiler.common.token.RecognisedToken;
 import com.company.compiler.common.token.TerminalToken;
+import com.company.compiler.common.token.Token;
 import com.company.compiler.lexer.exceptions.TokenNotRecognizedException;
-import com.company.compiler.lexer.model.LexerToken;
 import com.company.compiler.lexer.model.MatchedResult;
 import com.company.compiler.lexer.model.TokenMatcher;
 
@@ -62,10 +63,10 @@ public class LongestTokenLexer implements Lexer {
     }
 
     @Override
-    public List<RecognisedToken> analyze(String program, List<LexerToken> definedTokens) {
+    public List<RecognisedToken> analyze(String program, List<Token> definedTokens) {
         var tokenMatchers = Stream.concat(
                 definedTokens.stream(),
-                Stream.of(LexerToken.from(new TerminalToken()))
+                Stream.of(new TerminalToken())
         ).map(TokenMatcher::new).toList();
 
         int curr = 0;
@@ -95,8 +96,8 @@ public class LongestTokenLexer implements Lexer {
                 throw new TokenNotRecognizedException(word, line);
             }
 
-            if (!result.getToken().shouldIgnore()) {
-                recognisedTokens.add(RecognisedToken.match(result.getToken().getToken(), word.substring(0, result.getMatchedLength()), line));
+            if (!(result.getToken() instanceof IgnoredToken)) {
+                recognisedTokens.add(RecognisedToken.match(result.getToken(), word.substring(0, result.getMatchedLength()), line));
             }
 
             curr -= (word.length() - result.getMatchedLength());

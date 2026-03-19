@@ -1,15 +1,17 @@
 package com.company.compiler.lexer.model;
 
+import com.company.compiler.common.token.Token;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TokenMatcher {
-    private final LexerToken token;
+    private final Token token;
     private final Matcher matcher;
 
-    public TokenMatcher(LexerToken token) {
+    public TokenMatcher(Token token) {
         this.token = token;
-        Pattern pattern = Pattern.compile(token.getToken().getRegex());
+        Pattern pattern = Pattern.compile(token.getRegex());
         matcher = pattern.matcher("");
     }
 
@@ -28,7 +30,7 @@ public class TokenMatcher {
         return new MatchedResult(token, MatchedResult.MatchType.NO_MATCH, 0);
     }
 
-    public LexerToken getToken() {
+    public Token getToken() {
         return token;
     }
 }

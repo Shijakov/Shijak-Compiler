@@ -1,20 +1,27 @@
 package com.company.compiler.helpers;
 
 import com.company.compiler.common.grammar.Rule;
-import com.company.compiler.common.helpers.Pair;
 import com.company.compiler.common.symbol.NonTerminal;
-import com.company.compiler.common.symbol.StartSymbol;
 import com.company.compiler.common.symbol.Symbol;
 import com.company.compiler.common.symbol.Terminal;
+import com.company.compiler.common.token.IdentifierToken;
+import com.company.compiler.common.token.IgnoredToken;
 import com.company.compiler.common.token.Token;
-import com.company.compiler.common.tree.Node;
-import com.company.compiler.lexer.model.LexerToken;
+import com.company.compiler.parser.model.ParseNode;
 
 import java.util.List;
 
 public class Helpers {
     public static Token token(String regex) {
         return new Token(regex);
+    }
+
+    public static IdentifierToken identifierToken(String regex) {
+        return new IdentifierToken(regex);
+    }
+
+    public static IgnoredToken ignoredToken(String regex) {
+        return new IgnoredToken(regex);
     }
 
     public static NonTerminal nonTerminal(String name) {
@@ -29,7 +36,7 @@ public class Helpers {
         return new Rule(nonTerminal, right);
     }
 
-    public static <T> Node<T> node(T value) {
-        return new Node<>(value);
+    public static ParseNode node(Symbol value) {
+        return new ParseNode(value);
     }
 }

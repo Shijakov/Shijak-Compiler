@@ -7,8 +7,8 @@ import com.company.compiler.common.symbol.NonTerminal;
 import com.company.compiler.common.symbol.StartSymbol;
 import com.company.compiler.common.symbol.Symbol;
 import com.company.compiler.common.token.RecognisedToken;
-import com.company.compiler.common.tree.Node;
-import com.company.compiler.common.tree.Tree;
+import com.company.compiler.parser.model.ParseNode;
+import com.company.compiler.parser.model.ParseTree;
 import com.company.compiler.parser.exceptions.NoEntryInTableException;
 import com.company.compiler.parser.exceptions.UnexpectedTokenException;
 import com.company.compiler.parser.ll1.LL1Table;
@@ -19,12 +19,12 @@ import java.util.Stack;
 public class LL1Parser implements Parser {
 
     @Override
-    public Tree<Symbol> parse(List<RecognisedToken> tokens, Grammar grammar) {
+    public ParseTree parse(List<RecognisedToken> tokens, Grammar grammar) {
         var table = LL1Table.from(grammar);
 
-        var tree = new Tree<Symbol>(new Node<>(new StartSymbol()));
+        var tree = new ParseTree(new ParseNode(new StartSymbol()));
 
-        var nodeStack = new Stack<Node<Symbol>>();
+        var nodeStack = new Stack<ParseNode>();
         var tokenStack = new Stack<RecognisedToken>();
 
         nodeStack.push(tree.getRoot());
@@ -65,8 +65,8 @@ public class LL1Parser implements Parser {
         return tree;
     }
 
-    private List<Node<Symbol>> toNodes(List<Symbol> symbols) {
-        return symbols.stream().map(Node::new).toList();
+    private List<ParseNode> toNodes(List<Symbol> symbols) {
+        return symbols.stream().map(ParseNode::new).toList();
     }
 
     private <T> void pushToStack(Stack<T> stack, List<? extends T> objects) {

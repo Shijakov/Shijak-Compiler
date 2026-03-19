@@ -1,0 +1,57 @@
+package com.company.compiler.shijak;
+
+import com.company.compiler.common.symbol.NonTerminal;
+import com.company.compiler.common.symbol.NonTerminal;
+
+public class ShijakNonTerminals {
+    public static NonTerminal PROGRAM = new NonTerminal("PROGRAM");
+    public static NonTerminal DEFINITION = new NonTerminal("DEFINITION");
+    public static NonTerminal DEFINITION_ASSIGNMENT = new NonTerminal("DEFINITION_ASSIGNMENT");
+    public static NonTerminal FUNCTION = new NonTerminal("FUNCTION");
+    public static NonTerminal PARAM_LIST = new NonTerminal("PARAM_LIST");
+    public static NonTerminal PARAM_LIST_TAIL = new NonTerminal("PARAM_LIST_TAIL");
+    public static NonTerminal STATEMENT_LIST = new NonTerminal("STATEMENT_LIST");
+    public static NonTerminal STATEMENT = new NonTerminal("STATEMENT");
+    public static NonTerminal DEFINE_VAR = new NonTerminal("DEFINE_VAR");
+    public static NonTerminal ALLOC_ARR = new NonTerminal("ALLOC_ARR");
+    public static NonTerminal FREE_ARR = new NonTerminal("FREE_ARR");
+    public static NonTerminal RETURN_STATEMENT = new NonTerminal("RETURN_STATEMENT");
+    public static NonTerminal INPUT_STATEMENT = new NonTerminal("INPUT_STATEMENT");
+    public static NonTerminal OUTPUT_STATEMENT = new NonTerminal("OUTPUT_STATEMENT");
+    public static NonTerminal WHILE_STATEMENT = new NonTerminal("WHILE_STATEMENT");
+    public static NonTerminal BREAK_STATEMENT = new NonTerminal("BREAK_STATEMENT");
+    public static NonTerminal CONTINUE_STATEMENT = new NonTerminal("CONTINUE_STATEMENT");
+    public static NonTerminal IF_STATEMENT = new NonTerminal("IF_STATEMENT");
+    public static NonTerminal ELIF_STATEMENT = new NonTerminal("ELIF_STATEMENT");
+    public static NonTerminal ELSE_STATEMENT = new NonTerminal("ELSE_STATEMENT");
+    public static NonTerminal EXPRESSION_LIST = new NonTerminal("EXPRESSION_LIST");
+    public static NonTerminal EXPRESSION_LIST_TAIL = new NonTerminal("EXPRESSION_LIST_TAIL");
+    public static NonTerminal EXPRESSION_OR_CLOSER = new NonTerminal("EXPRESSION_OR_CLOSER");
+    public static NonTerminal CLOSER = new NonTerminal("CLOSER");
+    public static NonTerminal EXPRESSION = new NonTerminal("EXPRESSION");
+    public static NonTerminal EXPRESSION_TAIL = new NonTerminal("EXPRESSION_TAIL");
+    public static NonTerminal MOD_EXPR = new NonTerminal("MOD_EXPR");
+    public static NonTerminal MOD_EXPR_TAIL = new NonTerminal("MOD_EXPR_TAIL");
+    public static NonTerminal ADD_EXPR = new NonTerminal("ADD_EXPR");
+    public static NonTerminal ADD_EXPR_TAIL = new NonTerminal("ADD_EXPR_TAIL");
+    public static NonTerminal MUL_EXPR = new NonTerminal("MUL_EXPR");
+    public static NonTerminal MUL_EXPR_TAIL = new NonTerminal("MUL_EXPR_TAIL");
+    public static NonTerminal PRIMARY = new NonTerminal("PRIMARY");
+    public static NonTerminal INSTANCE = new NonTerminal("INSTANCE");
+    public static NonTerminal INSTANCE_TAIL = new NonTerminal("INSTANCE_TAIL");
+    public static NonTerminal EXPR_LIST = new NonTerminal("EXPR_LIST");
+    public static NonTerminal EXPR_LIST_TAIL = new NonTerminal("EXPR_LIST_TAIL");
+    public static NonTerminal RETURN_TYPE = new NonTerminal("RETURN_TYPE");
+    public static NonTerminal TYPE = new NonTerminal("TYPE");
+    public static NonTerminal ARRAY_EMPTY_EXTENSION = new NonTerminal("ARRAY_EMPTY_EXTENSION");
+    public static NonTerminal PRIMITIVE_TYPE = new NonTerminal("PRIMITIVE_TYPE");
+    public static NonTerminal PRIMITIVE_CONSTANT = new NonTerminal("PRIMITIVE_CONSTANT");
+    public static NonTerminal FUNCTION_OR_BAG = new NonTerminal("FUNCTION_OR_BAG");
+    public static NonTerminal BAG_DEFINITION = new NonTerminal("BAG_DEFINITION");
+    public static NonTerminal BAG_DEFINITION_PARAMETER_LIST = new NonTerminal("BAG_DEFINITION_PARAMETER_LIST");
+    public static NonTerminal BAG_DEFINITION_PARAMETER_LIST_TAIL = new NonTerminal("BAG_DEFINITION_PARAMETER_LIST_TAIL");
+    public static NonTerminal FILL_STATEMENT = new NonTerminal("FILL_STATEMENT");
+    public static NonTerminal ASSIGNABLE_INSTANCE = new NonTerminal("ASSIGNABLE_INSTANCE");
+    public static NonTerminal ASSIGNABLE_INSTANCE_TAIL = new NonTerminal("ASSIGNABLE_INSTANCE_TAIL");
+    public static NonTerminal DOT_TAIL = new NonTerminal("DOT_TAIL");
+}

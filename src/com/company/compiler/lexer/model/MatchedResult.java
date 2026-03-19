@@ -1,5 +1,8 @@
 package com.company.compiler.lexer.model;
 
+import com.company.compiler.common.token.IdentifierToken;
+import com.company.compiler.common.token.Token;
+
 public class MatchedResult implements Comparable<MatchedResult> {
     public enum MatchType {
         MATCHED,
@@ -8,11 +11,11 @@ public class MatchedResult implements Comparable<MatchedResult> {
         NO_MATCH,
     }
 
-    private final LexerToken token;
+    private final Token token;
     private final MatchType matchType;
     private final int matchedLength;
 
-    public MatchedResult(LexerToken token, MatchType matchType, int matchedLength) {
+    public MatchedResult(Token token, MatchType matchType, int matchedLength) {
         this.token = token;
         this.matchType = matchType;
         this.matchedLength = matchedLength;
@@ -22,7 +25,21 @@ public class MatchedResult implements Comparable<MatchedResult> {
     public int compareTo(MatchedResult o) {
         var compareRez = matchedLength - o.matchedLength;
 
-        return compareRez != 0 ? compareRez : token.compareTo(o.token);
+        if (compareRez != 0) {
+            return compareRez;
+        }
+
+        if (token instanceof IdentifierToken && o.token instanceof IdentifierToken) {
+            return 0;
+        }
+        if (token instanceof IdentifierToken) {
+            return -1;
+        }
+        if (o.token instanceof IdentifierToken) {
+            return 1;
+        }
+
+        return 0;
     }
 
     public boolean stillMatching() {
@@ -33,7 +50,7 @@ public class MatchedResult implements Comparable<MatchedResult> {
         return this.matchType == MatchType.MATCHED;
     }
 
-    public LexerToken getToken() {
+    public Token getToken() {
         return token;
     }
 
