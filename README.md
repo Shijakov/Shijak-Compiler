@@ -221,4 +221,11 @@ Additional examples are available in the `examples` folder located in the root d
 - Improve type consistency
 - Add support for strings
 
+# Remarks
+
+The current stable implementation of the compiler is located in:
+`package com.company.old`
+
+A newer version, currently under development and based on object-oriented design principles, can be found in:
+`package com.company.compiler`
 
