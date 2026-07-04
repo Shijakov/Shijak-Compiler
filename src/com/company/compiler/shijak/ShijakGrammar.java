@@ -3,6 +3,7 @@ package com.company.compiler.shijak;
 import com.company.compiler.common.grammar.Grammar;
 import com.company.compiler.common.grammar.GrammarBuilder;
 import com.company.compiler.common.grammar.Rule;
+import com.company.compiler.common.symbol.EmptySymbol;
 import com.company.compiler.common.symbol.NonTerminal;
 import com.company.compiler.common.symbol.StartSymbol;
 import com.company.compiler.common.symbol.Symbol;
@@ -30,28 +31,28 @@ public class ShijakGrammar {
 
         rule(DEFINITION, defineToken, openingCurlyBracketToken, DEFINITION_ASSIGNMENT, closingCurlyBracketToken);
         rule(DEFINITION_ASSIGNMENT, PRIMITIVE_CONSTANT, expressionCombinerToken, nameToken, semiColonToken, DEFINITION_ASSIGNMENT);
-        rule(DEFINITION_ASSIGNMENT);
+        rule(DEFINITION_ASSIGNMENT, new EmptySymbol());
 
         rule(FUNCTION_OR_BAG, FUNCTION, FUNCTION_OR_BAG);
         rule(FUNCTION_OR_BAG, BAG_DEFINITION, FUNCTION_OR_BAG);
-        rule(FUNCTION_OR_BAG);
+        rule(FUNCTION_OR_BAG, new EmptySymbol());
 
         rule(BAG_DEFINITION, bagToken, nameToken, openingCurlyBracketToken, BAG_DEFINITION_PARAMETER_LIST, closingCurlyBracketToken);
 
         rule(BAG_DEFINITION_PARAMETER_LIST, nameToken, colonToken, TYPE, BAG_DEFINITION_PARAMETER_LIST_TAIL);
-        rule(BAG_DEFINITION_PARAMETER_LIST);
+        rule(BAG_DEFINITION_PARAMETER_LIST, new EmptySymbol());
         rule(BAG_DEFINITION_PARAMETER_LIST_TAIL, commaToken, nameToken, colonToken, TYPE, BAG_DEFINITION_PARAMETER_LIST_TAIL);
-        rule(BAG_DEFINITION_PARAMETER_LIST_TAIL);
+        rule(BAG_DEFINITION_PARAMETER_LIST_TAIL, new EmptySymbol());
 
         rule(FUNCTION, functionToken, nameToken, openingBracketToken, PARAM_LIST, closingBracketToken, colonToken, RETURN_TYPE, openingCurlyBracketToken, STATEMENT_LIST, closingCurlyBracketToken);
 
         rule(PARAM_LIST, nameToken, colonToken, TYPE, PARAM_LIST_TAIL);
-        rule(PARAM_LIST);
+        rule(PARAM_LIST, new EmptySymbol());
         rule(PARAM_LIST_TAIL, commaToken, nameToken, colonToken, TYPE, PARAM_LIST_TAIL);
-        rule(PARAM_LIST_TAIL);
+        rule(PARAM_LIST_TAIL, new EmptySymbol());
 
         rule(STATEMENT_LIST, STATEMENT, STATEMENT_LIST);
-        rule(STATEMENT_LIST);
+        rule(STATEMENT_LIST, new EmptySymbol());
 
         rule(STATEMENT, WHILE_STATEMENT);
         rule(STATEMENT, IF_STATEMENT);
@@ -87,14 +88,14 @@ public class ShijakGrammar {
 
         rule(IF_STATEMENT, ifToken, openingBracketToken, EXPRESSION, closingBracketToken, openingCurlyBracketToken, STATEMENT_LIST, closingCurlyBracketToken, ELIF_STATEMENT, ELSE_STATEMENT);
         rule(ELIF_STATEMENT, elifToken, openingBracketToken, EXPRESSION, closingBracketToken, openingCurlyBracketToken, STATEMENT_LIST, closingCurlyBracketToken, ELIF_STATEMENT);
-        rule(ELIF_STATEMENT);
+        rule(ELIF_STATEMENT, new EmptySymbol());
         rule(ELSE_STATEMENT, elseToken, openingCurlyBracketToken, STATEMENT_LIST, closingCurlyBracketToken);
-        rule(ELSE_STATEMENT);
+        rule(ELSE_STATEMENT, new EmptySymbol());
 
         rule(EXPRESSION_LIST, EXPRESSION, EXPRESSION_LIST_TAIL, semiColonToken);
 
         rule(EXPRESSION_LIST_TAIL, expressionCombinerToken, EXPRESSION_OR_CLOSER);
-        rule(EXPRESSION_LIST_TAIL);
+        rule(EXPRESSION_LIST_TAIL, new EmptySymbol());
 
         rule(EXPRESSION_OR_CLOSER, CLOSER);
         rule(EXPRESSION_OR_CLOSER, EXPRESSION, EXPRESSION_LIST_TAIL);
@@ -109,23 +110,23 @@ public class ShijakGrammar {
         rule(EXPRESSION_TAIL, greaterThanToken, MOD_EXPR);
         rule(EXPRESSION_TAIL, equalToken, MOD_EXPR);
         rule(EXPRESSION_TAIL, notEqualToken, MOD_EXPR);
-        rule(EXPRESSION_TAIL);
+        rule(EXPRESSION_TAIL, new EmptySymbol());
 
         rule(MOD_EXPR, ADD_EXPR, MOD_EXPR_TAIL);
         rule(MOD_EXPR_TAIL, moduloToken, ADD_EXPR, MOD_EXPR_TAIL);
-        rule(MOD_EXPR_TAIL);
+        rule(MOD_EXPR_TAIL, new EmptySymbol());
 
         rule(ADD_EXPR, MUL_EXPR, ADD_EXPR_TAIL);
         rule(ADD_EXPR_TAIL, plusToken, MUL_EXPR, ADD_EXPR_TAIL);
         rule(ADD_EXPR_TAIL, minusToken, MUL_EXPR, ADD_EXPR_TAIL);
         rule(ADD_EXPR_TAIL, orToken, MUL_EXPR, ADD_EXPR_TAIL);
-        rule(ADD_EXPR_TAIL);
+        rule(ADD_EXPR_TAIL, new EmptySymbol());
 
         rule(MUL_EXPR, PRIMARY, MUL_EXPR_TAIL);
         rule(MUL_EXPR_TAIL, multiplicationToken, PRIMARY, MUL_EXPR_TAIL);
         rule(MUL_EXPR_TAIL, divisionToken, PRIMARY, MUL_EXPR_TAIL);
         rule(MUL_EXPR_TAIL, andToken, PRIMARY, MUL_EXPR_TAIL);
-        rule(MUL_EXPR_TAIL);
+        rule(MUL_EXPR_TAIL, new EmptySymbol());
 
         rule(PRIMARY, INSTANCE);
         rule(PRIMARY, notToken, PRIMARY);
@@ -143,12 +144,12 @@ public class ShijakGrammar {
         rule(ASSIGNABLE_INSTANCE_TAIL, DOT_TAIL);
 
         rule(DOT_TAIL, dotToken, nameToken, ASSIGNABLE_INSTANCE_TAIL);
-        rule(DOT_TAIL);
+        rule(DOT_TAIL, new EmptySymbol());
 
         rule(EXPR_LIST, EXPRESSION, EXPR_LIST_TAIL);
-        rule(EXPR_LIST);
+        rule(EXPR_LIST, new EmptySymbol());
         rule(EXPR_LIST_TAIL, commaToken, EXPRESSION, EXPR_LIST_TAIL);
-        rule(EXPR_LIST_TAIL);
+        rule(EXPR_LIST_TAIL, new EmptySymbol());
 
         rule(RETURN_TYPE, TYPE);
         rule(RETURN_TYPE, voidToken);
@@ -156,7 +157,7 @@ public class ShijakGrammar {
         rule(TYPE, PRIMITIVE_TYPE, ARRAY_EMPTY_EXTENSION);
 
         rule(ARRAY_EMPTY_EXTENSION, openingSquareBracketToken, closingSquareBracketToken);
-        rule(ARRAY_EMPTY_EXTENSION);
+        rule(ARRAY_EMPTY_EXTENSION, new EmptySymbol());
 
         rule(PRIMITIVE_TYPE, intToken);
         rule(PRIMITIVE_TYPE, floatToken);

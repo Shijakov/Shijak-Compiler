@@ -93,7 +93,7 @@ public class LL1ParserTest {
     public void testSimpleShijakFunction() throws NoNextNodeInTreeBuilderException {
         var recognizedTokens = List.of(
                 rToken(functionToken),
-                rToken(nameToken, "a"),
+                rToken(nameToken, "main"),
                 rToken(openingBracketToken),
                 rToken(closingBracketToken),
                 rToken(colonToken),
@@ -107,14 +107,18 @@ public class LL1ParserTest {
                 rToken(multiplicationToken),
                 rToken(intConstToken, "2"),
                 rToken(semiColonToken),
-                rToken(closingCurlyBracketToken)
+                rToken(closingCurlyBracketToken),
+                rToken(new TerminalToken())
         );
 
         var tree = (new LL1Parser()).parse(recognizedTokens, ShijakGrammar.get());
 
         var expected = TreeBuilder.from(new ParseTree(new ParseNode(new StartSymbol())))
-                .attachNodes(List.of(node(PROGRAM)))
+                .attachNodes(List.of(node(PROGRAM), node(new TerminalToken())))
+
                 .attachNodes(List.of(node(FUNCTION_OR_BAG)))
+                .attachNodes(List.of())
+
                 .attachNodes(List.of( node(FUNCTION), node(FUNCTION_OR_BAG) ))
                 .attachNodes(List.of( node(functionToken), node(nameToken), node(openingBracketToken), node(PARAM_LIST), node(closingBracketToken), node(colonToken), node(RETURN_TYPE), node(openingCurlyBracketToken), node(STATEMENT_LIST), node(closingCurlyBracketToken) ))
                 .attachNodes(List.of( node(new EmptySymbol()) ))
@@ -135,11 +139,12 @@ public class LL1ParserTest {
                 .attachNodes(List.of( node(EXPRESSION_LIST) ))
                 .attachNodes(List.of( node(new EmptySymbol()) ))
 
-                .attachNodes(List.of( node(EXPRESSION), node(EXPRESSION_LIST_TAIL) ))
+                .attachNodes(List.of( node(EXPRESSION), node(EXPRESSION_LIST_TAIL), node(semiColonToken) ))
                 .attachNodes(List.of(  ))
 
                 .attachNodes(List.of( node(MOD_EXPR), node(EXPRESSION_TAIL) ))
                 .attachNodes(List.of( node(expressionCombinerToken), node(EXPRESSION_OR_CLOSER) )) //
+                .attachNodes(List.of())
 
                 .attachNodes(List.of( node(ADD_EXPR), node(MOD_EXPR_TAIL) )) //
                 .attachNodes(List.of( node(new EmptySymbol()) )) //

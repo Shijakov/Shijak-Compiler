@@ -5,6 +5,7 @@ import com.company.compiler.common.symbol.EmptySymbol;
 import com.company.compiler.common.symbol.StartSymbol;
 import com.company.compiler.common.token.TerminalToken;
 import com.company.compiler.parser.ll1.exceptions.GrammarIsLeftRecursive;
+import com.company.compiler.shijak.ShijakGrammar;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static com.company.compiler.helpers.Helpers.*;
+import static com.company.compiler.shijak.ShijakNonTerminals.*;
+import static com.company.compiler.shijak.ShijakTokens.*;
 
 public class FirstSetTest {
     @Test
@@ -683,6 +686,280 @@ public class FirstSetTest {
         assertEquals(
                 Set.of(id),
                 firstSet.getFor(rule(F, List.of(id)))
+        );
+    }
+
+    @Test
+    public void testShijakGrammar() {
+        var empty = new EmptySymbol();
+        var firstSet = FirstSet.from(ShijakGrammar.get());
+
+        assertEquals(51, firstSet.size());
+
+        assertEquals(
+                Set.of(empty, defineToken, functionToken, bagToken),
+                firstSet.getFor(PROGRAM)
+        );
+
+        assertEquals(
+                Set.of(defineToken),
+                firstSet.getFor(DEFINITION)
+        );
+
+        assertEquals(
+                Set.of(empty, charConstToken, falseConstToken, trueConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(DEFINITION_ASSIGNMENT)
+        );
+
+        assertEquals(
+                Set.of(empty, functionToken, bagToken),
+                firstSet.getFor(FUNCTION_OR_BAG)
+        );
+
+        assertEquals(
+                Set.of(bagToken),
+                firstSet.getFor(BAG_DEFINITION)
+        );
+
+        assertEquals(
+                Set.of(nameToken, empty),
+                firstSet.getFor(BAG_DEFINITION_PARAMETER_LIST)
+        );
+
+        assertEquals(
+                Set.of(commaToken, empty),
+                firstSet.getFor(BAG_DEFINITION_PARAMETER_LIST_TAIL)
+        );
+
+        assertEquals(
+                Set.of(functionToken),
+                firstSet.getFor(FUNCTION)
+        );
+
+        assertEquals(
+                Set.of(nameToken, empty),
+                firstSet.getFor(PARAM_LIST)
+        );
+
+        assertEquals(
+                Set.of(commaToken, empty),
+                firstSet.getFor(PARAM_LIST_TAIL)
+        );
+
+        //'',while,if,break,continue,let,input,output,alloc,free,return,fill,!,(,in,identifier,char_constant,bool_constant,int_constant,float_constant
+        //'',while,if,break,continue,let,input,output,alloc,free,return,fill,!,(,in,identifier,char_constant,bool_constant,int_constant,float_constant
+        assertEquals(
+                Set.of(empty, whileToken, ifToken, breakToken, continueToken, letToken, inputToken, outputToken, allocToken, freeToken, returnToken, fillToken, notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(STATEMENT_LIST)
+        );
+
+        assertEquals(
+                Set.of(whileToken, ifToken, breakToken, continueToken, letToken, inputToken, outputToken, allocToken, freeToken, returnToken, fillToken, notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(fillToken),
+                firstSet.getFor(FILL_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(letToken),
+                firstSet.getFor(DEFINE_VAR)
+        );
+
+        assertEquals(
+                Set.of(allocToken),
+                firstSet.getFor(ALLOC_ARR)
+        );
+
+        assertEquals(
+                Set.of(freeToken),
+                firstSet.getFor(FREE_ARR)
+        );
+
+        assertEquals(
+                Set.of(returnToken),
+                firstSet.getFor(RETURN_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(breakToken),
+                firstSet.getFor(BREAK_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(continueToken),
+                firstSet.getFor(CONTINUE_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(inputToken),
+                firstSet.getFor(INPUT_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(outputToken),
+                firstSet.getFor(OUTPUT_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(whileToken),
+                firstSet.getFor(WHILE_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(ifToken),
+                firstSet.getFor(IF_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(elifToken, empty),
+                firstSet.getFor(ELIF_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(elseToken, empty),
+                firstSet.getFor(ELSE_STATEMENT)
+        );
+
+        assertEquals(
+                Set.of(notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(EXPRESSION_LIST)
+        );
+
+        assertEquals(
+                Set.of(expressionCombinerToken, empty),
+                firstSet.getFor(EXPRESSION_LIST_TAIL)
+        );
+
+        // {return,eq,!,(,in,identifier,char_constant,bool_constant,int_constant,float_constant}
+        assertEquals(
+                Set.of(returnToken, eqToken, notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(EXPRESSION_OR_CLOSER)
+        );
+
+        assertEquals(
+                Set.of(returnToken, eqToken),
+                firstSet.getFor(CLOSER)
+        );
+
+        // {!,(,in,identifier,char_constant,bool_constant,int_constant,float_constant}
+        assertEquals(
+                Set.of(notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(EXPRESSION)
+        );
+
+        // {>=,<=,<,>,==,!=,''}
+        assertEquals(
+                Set.of(greaterThanOrEqualToken, lessThanOrEqualToken, greaterThanToken, lessThanToken, equalToken, notEqualToken, empty),
+                firstSet.getFor(EXPRESSION_TAIL)
+        );
+
+        // {!,(,in,identifier,char_constant,bool_constant,int_constant,float_constant}
+        assertEquals(
+                Set.of(notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(MOD_EXPR)
+        );
+
+        // {%,''}
+        assertEquals(
+                Set.of(moduloToken, empty),
+                firstSet.getFor(MOD_EXPR_TAIL)
+        );
+
+        // {!,(,in,identifier,char_constant,bool_constant,int_constant,float_constant}
+        assertEquals(
+                Set.of(notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(ADD_EXPR)
+        );
+        // {+,-,||,''}
+        assertEquals(
+                Set.of(plusToken, minusToken, orToken, empty),
+                firstSet.getFor(ADD_EXPR_TAIL)
+        );
+
+        assertEquals(
+                Set.of(notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(MUL_EXPR)
+        );
+
+        // {*,/,&&,''}
+        assertEquals(
+                Set.of(multiplicationToken, divisionToken, andToken, empty),
+                firstSet.getFor(MUL_EXPR_TAIL)
+        );
+
+        assertEquals(
+                Set.of(notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(PRIMARY)
+        );
+
+        assertEquals(
+                Set.of(nameToken),
+                firstSet.getFor(INSTANCE)
+        );
+
+        // {(,[,.,''}
+        assertEquals(
+                Set.of(openingBracketToken, openingSquareBracketToken, dotToken, empty),
+                firstSet.getFor(INSTANCE_TAIL)
+        );
+
+        assertEquals(
+                Set.of(nameToken),
+                firstSet.getFor(ASSIGNABLE_INSTANCE)
+        );
+
+        // {[,.,''}
+        assertEquals(
+                Set.of(openingSquareBracketToken, dotToken, empty),
+                firstSet.getFor(ASSIGNABLE_INSTANCE_TAIL)
+        );
+
+        // {.,''}
+        assertEquals(
+                Set.of(dotToken, empty),
+                firstSet.getFor(DOT_TAIL)
+        );
+
+        // {'',!,(,in,identifier,char_constant,bool_constant,int_constant,float_constant}
+        assertEquals(
+                Set.of(empty, notToken, openingBracketToken, inToken, nameToken, charConstToken, trueConstToken, falseConstToken, intConstToken, floatConstToken),
+                firstSet.getFor(EXPR_LIST)
+        );
+
+        // {,,''}
+        assertEquals(
+                Set.of(commaToken, empty),
+                firstSet.getFor(EXPR_LIST_TAIL)
+        );
+
+        // {void,int,float,char,bool,bag}
+        assertEquals(
+                Set.of(voidToken, intToken, floatToken, charToken, boolToken, bagToken),
+                firstSet.getFor(RETURN_TYPE)
+        );
+
+        assertEquals(
+                Set.of(intToken, floatToken, charToken, boolToken, bagToken),
+                firstSet.getFor(TYPE)
+        );
+
+        // {[,''}
+        assertEquals(
+                Set.of(openingSquareBracketToken, empty),
+                firstSet.getFor(ARRAY_EMPTY_EXTENSION)
+        );
+
+        assertEquals(
+                Set.of(intToken, floatToken, charToken, boolToken, bagToken),
+                firstSet.getFor(PRIMITIVE_TYPE)
+        );
+
+        assertEquals(
+                Set.of(charConstToken, intConstToken, falseConstToken, trueConstToken, floatConstToken),
+                firstSet.getFor(PRIMITIVE_CONSTANT)
         );
     }
 }

@@ -56,6 +56,7 @@ public class LL1Table {
 
     public static LL1Table from(Grammar grammar) {
         var firstSet = FirstSet.from(grammar);
+
         var followSet = FollowSet.from(grammar, firstSet);
 
         var table = new LL1Table();
@@ -68,7 +69,7 @@ public class LL1Table {
             }
 
             var followSetOfNonTerminal = followSet.getFor(rule.getLeft());
-            addEntries(table, new Rule(rule.getLeft(), List.of(new EmptySymbol())), followSetOfNonTerminal);
+            addEntries(table, rule, followSetOfNonTerminal);
         }
 
         return table;

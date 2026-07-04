@@ -12,6 +12,7 @@ import com.company.compiler.parser.model.ParseTree;
 import com.company.compiler.parser.exceptions.NoEntryInTableException;
 import com.company.compiler.parser.exceptions.UnexpectedTokenException;
 import com.company.compiler.parser.ll1.LL1Table;
+import com.company.compiler.shijak.ShijakNonTerminals;
 
 import java.util.List;
 import java.util.Stack;
@@ -32,6 +33,7 @@ public class LL1Parser implements Parser {
 
         while (true) {
             var currNode = nodeStack.pop();
+
             var currToken = tokenStack.peek();
 
             if (currToken.equals(currNode.getValue())) {

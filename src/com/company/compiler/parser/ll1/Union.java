@@ -14,8 +14,18 @@ public class Union {
 
     public interface UnionElement {}
 
-    public record FollowOf(NonTerminal nonTerminal) implements UnionElement {}
-    public record FirstOf(Symbol symbol) implements UnionElement {}
+    public record FollowOf(NonTerminal nonTerminal) implements UnionElement {
+        @Override
+        public String toString() {
+            return "FollowOf(" + nonTerminal + ")";
+        }
+    }
+    public record FirstOf(Symbol symbol) implements UnionElement {
+        @Override
+        public String toString() {
+            return "FirstOf(" + symbol + ")";
+        }
+    }
 
     public Union() {
         this.union = new HashSet<>();
@@ -47,7 +57,7 @@ public class Union {
 
         for (var element : union) {
             var terminals = getTerminalsFor(element, nonTerminal, firstSet, followSet);
-            if (terminals == null) return null;
+            if (terminals == null) continue;
             terminalsSet.addAll(terminals);
         }
 

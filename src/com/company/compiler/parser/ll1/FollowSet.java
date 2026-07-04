@@ -7,6 +7,7 @@ import com.company.compiler.common.symbol.NonTerminal;
 import com.company.compiler.common.symbol.StartSymbol;
 import com.company.compiler.common.symbol.Terminal;
 import com.company.compiler.common.token.TerminalToken;
+import com.company.compiler.shijak.ShijakNonTerminals;
 
 import java.util.*;
 
@@ -22,7 +23,7 @@ public class FollowSet {
     }
 
     private void setFor(NonTerminal nonTerminal, Set<Terminal> terminals) {
-        this.entries.put(nonTerminal, terminals);
+        this.entries.compute(nonTerminal, (k, v) -> v == null ? new HashSet<>() : v).addAll(terminals);
     }
 
     public boolean hasFor(NonTerminal nonTerminal) {
@@ -30,10 +31,7 @@ public class FollowSet {
     }
 
     public Set<Terminal> getFor(NonTerminal nonTerminal) {
-        if (!this.entries.containsKey(nonTerminal)) {
-            throw new DevException("Tried to access not set key in follow set");
-        }
-        return new HashSet<>(this.entries.get(nonTerminal));
+        return new HashSet<>(this.entries.getOrDefault(nonTerminal, Set.of()));
     }
 
     private static void computeUnions(Rule rule, FirstSet firstSet, Map<NonTerminal, Union> unions) {
@@ -74,20 +72,17 @@ public class FollowSet {
 
         while(!unions.isEmpty()) {
             var changeOccurred = false;
-            var unionsToRemove = new ArrayList<NonTerminal>();
             for (var nonTerminal : unions.keySet()) {
                 var rez = unions.get(nonTerminal).compute(nonTerminal, firstSet, followSet);
-                if (rez != null) {
+                var elmsBefore = followSet.getFor(nonTerminal).size();
+                followSet.setFor(nonTerminal, rez);
+                var elmsAfter = followSet.getFor(nonTerminal).size();
+                if (elmsBefore != elmsAfter) {
                     changeOccurred = true;
-                    followSet.setFor(nonTerminal, rez);
-                    unionsToRemove.add(nonTerminal);
                 }
             }
-            for (var toRemove : unionsToRemove) {
-                unions.remove(toRemove);
-            }
             if (!changeOccurred) {
-                throw new DevException("An iteration without change happened while computing follow set");
+                break;
             }
         }
 
